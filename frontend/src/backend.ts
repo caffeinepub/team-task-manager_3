@@ -106,6 +106,7 @@ export enum Priority {
     Medium = "Medium"
 }
 export enum Status {
+    CarryForward = "CarryForward",
     InProgress = "InProgress",
     Completed = "Completed",
     Pending = "Pending"
@@ -291,13 +292,15 @@ function from_candid_variant_n11(_uploadFile: (file: ExternalBlob) => Promise<Ui
     return "Low" in value ? Priority.Low : "High" in value ? Priority.High : "Medium" in value ? Priority.Medium : value;
 }
 function from_candid_variant_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    CarryForward: null;
+} | {
     InProgress: null;
 } | {
     Completed: null;
 } | {
     Pending: null;
 }): Status {
-    return "InProgress" in value ? Status.InProgress : "Completed" in value ? Status.Completed : "Pending" in value ? Status.Pending : value;
+    return "CarryForward" in value ? Status.CarryForward : "InProgress" in value ? Status.InProgress : "Completed" in value ? Status.Completed : "Pending" in value ? Status.Pending : value;
 }
 function from_candid_vec_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Task>): Array<Task> {
     return value.map((x)=>from_candid_Task_n5(_uploadFile, _downloadFile, x));
@@ -312,13 +315,17 @@ function to_candid_opt_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Arra
     return value === null ? candid_none() : candid_some(value);
 }
 function to_candid_variant_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Status): {
+    CarryForward: null;
+} | {
     InProgress: null;
 } | {
     Completed: null;
 } | {
     Pending: null;
 } {
-    return value == Status.InProgress ? {
+    return value == Status.CarryForward ? {
+        CarryForward: null
+    } : value == Status.InProgress ? {
         InProgress: null
     } : value == Status.Completed ? {
         Completed: null

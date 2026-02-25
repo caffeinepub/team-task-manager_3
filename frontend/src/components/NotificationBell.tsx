@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bell, AlertTriangle, Clock, AlertCircle, X } from 'lucide-react';
+import { Bell, AlertTriangle, Clock, AlertCircle, X, RotateCcw } from 'lucide-react';
 import { useTaskReminders } from '../hooks/useTaskReminders';
 import { type Task } from '../backend';
 
@@ -15,7 +15,7 @@ function formatDeadline(deadline: bigint): string {
 
 interface ReminderItemProps {
   task: Task;
-  type: 'overdue' | 'critical' | 'warning';
+  type: 'overdue' | 'critical' | 'warning' | 'carryForward';
 }
 
 function ReminderItem({ task, type }: ReminderItemProps) {
@@ -23,6 +23,7 @@ function ReminderItem({ task, type }: ReminderItemProps) {
     overdue: { icon: AlertTriangle, color: 'text-red-400', bg: 'bg-red-500/10', label: 'Overdue' },
     critical: { icon: AlertCircle, color: 'text-orange-400', bg: 'bg-orange-500/10', label: 'Due < 1hr' },
     warning: { icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-500/10', label: 'Due < 24hr' },
+    carryForward: { icon: RotateCcw, color: 'text-carry-forward', bg: 'bg-carry-forward/10', label: 'Carry Forward' },
   }[type];
 
   const Icon = config.icon;
@@ -47,7 +48,7 @@ export default function NotificationBell() {
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const { overdue, dueInOneHour, dueInTwentyFourHours, totalCount } = useTaskReminders();
+  const { overdue, dueInOneHour, dueInTwentyFourHours, carryForward, totalCount } = useTaskReminders();
 
   // Close on outside click
   useEffect(() => {
@@ -106,7 +107,7 @@ export default function NotificationBell() {
           </div>
 
           {/* Content */}
-          <div className="max-h-80 overflow-y-auto p-3 space-y-3">
+          <div className="max-h-96 overflow-y-auto p-3 space-y-3">
             {totalCount === 0 ? (
               <div className="text-center py-6">
                 <Bell className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
@@ -126,10 +127,11 @@ export default function NotificationBell() {
                     </div>
                   </div>
                 )}
+
                 {dueInOneHour.length > 0 && (
                   <div>
                     <p className="text-[10px] font-semibold text-orange-400 uppercase tracking-wider mb-1.5">
-                      Due within 1 hour ({dueInOneHour.length})
+                      Due Soon — &lt;1 Hour ({dueInOneHour.length})
                     </p>
                     <div className="space-y-1.5">
                       {dueInOneHour.map(task => (
@@ -138,14 +140,28 @@ export default function NotificationBell() {
                     </div>
                   </div>
                 )}
+
                 {dueInTwentyFourHours.length > 0 && (
                   <div>
                     <p className="text-[10px] font-semibold text-yellow-400 uppercase tracking-wider mb-1.5">
-                      Due within 24 hours ({dueInTwentyFourHours.length})
+                      Due Today — &lt;24 Hours ({dueInTwentyFourHours.length})
                     </p>
                     <div className="space-y-1.5">
                       {dueInTwentyFourHours.map(task => (
                         <ReminderItem key={String(task.id)} task={task} type="warning" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {carryForward.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-semibold text-carry-forward uppercase tracking-wider mb-1.5">
+                      Carry Forward — Needs Attention ({carryForward.length})
+                    </p>
+                    <div className="space-y-1.5">
+                      {carryForward.map(task => (
+                        <ReminderItem key={String(task.id)} task={task} type="carryForward" />
                       ))}
                     </div>
                   </div>

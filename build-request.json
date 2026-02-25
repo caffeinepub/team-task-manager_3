@@ -1,39 +1,121 @@
 {
   "kind": "build_request",
-  "title": "Add Conference Name field to Create Task modal",
+  "title": "Team Member Task View, Carry Forward Status, Enhanced Reports & Reminders",
+  "projectName": "TaskFlow",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-13",
-      "text": "Add an optional 'Conference Name' text input field to the Create Task modal form (CreateTaskModal.tsx). The field should appear between the task title and description fields, be labeled 'Conference Name', and its value must be stored and passed to the backend createTask call.",
-      "target": "both",
+      "id": "REQ-15",
+      "text": "Add a 'Team Members' section to the Admin Dashboard that lists all team member names fetched via getTeamMembers. Each name is displayed as a clickable card/row. Clicking a name expands or navigates to show all tasks assigned to that person (fetched via getTasksByAssignee or filtered from getAllTasks). Below each team member's name, display a status summary showing counts for Pending, In Progress, Completed, and Carry Forward tasks.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-7"
         ],
         "quotes": [
-          "Under Create New Task\n\nAdd a field in the name of \"Conference Name\""
+          "The admin should see a list of all team member names.",
+          "When the admin clicks on a team member's name, all tasks assigned to that person should be displayed.",
+          "Under each team member's name, the task status summary should be visible."
         ]
       },
       "acceptanceCriteria": [
-        "The Create Task modal contains a text input field labeled 'Conference Name'.",
-        "The field is optional (submission is not blocked if left empty).",
-        "The field is positioned within the form in a logical order alongside existing fields.",
-        "The Conference Name value is included in the data submitted to the backend createTask mutation.",
-        "The backend Task data type and createTask function accept and store the new conferenceName field (optional Text).",
-        "Existing task cards display the conference name if present.",
-        "The CSV export includes a 'Conference Name' column."
+        "Admin Dashboard shows a list of all team member names fetched from the backend.",
+        "Each team member name is clickable and reveals all tasks assigned to that person.",
+        "Below each team member name, a summary displays counts for Pending, In Progress, Completed, and Carry Forward statuses.",
+        "The task list per member is sorted by deadline then priority.",
+        "Each task in the expanded view shows its current status."
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "text": "Add 'Carry Forward' as a new task status variant in the Motoko backend alongside the existing #Pending, #InProgress, and #Completed variants. Update the updateTaskStatus call to accept #CarryForward. Update all backend query responses to include this new status value.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ],
+        "quotes": [
+          "Clicking a name should show all assigned tasks along with status (Pending, In Progress, Completed, Carry Forward)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The task status type in Motoko includes a #CarryForward variant.",
+        "updateTaskStatus accepts #CarryForward as a valid status.",
+        "getAllTasks and getTasksByAssignee return tasks with #CarryForward status correctly.",
+        "Existing tasks with other statuses are unaffected."
+      ]
+    },
+    {
+      "id": "REQ-17",
+      "text": "Update the task status dropdown/control in TaskCard and TaskStatusControl components to include 'Carry Forward' as a selectable status option alongside Pending, In Progress, and Completed. Apply a distinct color style (e.g. purple/indigo) to the Carry Forward status badge and card.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ],
+        "quotes": [
+          "Clicking a name should show all assigned tasks along with status (Pending, In Progress, Completed, Carry Forward)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Task cards display 'Carry Forward' as a selectable status in the status control.",
+        "Selecting 'Carry Forward' calls updateTaskStatus with the carry forward value and updates the UI immediately.",
+        "Carry Forward status is visually distinct from other statuses (e.g. purple/indigo color).",
+        "The status summary counts in REQ-15 include Carry Forward tasks."
+      ]
+    },
+    {
+      "id": "REQ-18",
+      "text": "Add reminders for carry-forward tasks to the in-app notification system. Tasks with a 'Carry Forward' status should appear in the NotificationBell panel with a distinct urgency label (e.g. 'Carry Forward — needs attention'). These should be evaluated on page load and on the existing 5-minute interval.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ],
+        "quotes": [
+          "receive reminders for carry-forward tasks"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Tasks with Carry Forward status appear in the notification bell panel.",
+        "They are labeled with a distinct urgency reason such as 'Carry Forward — needs attention'.",
+        "The notification badge count includes carry-forward tasks.",
+        "Carry-forward reminders are evaluated on page load and every 5 minutes."
+      ]
+    },
+    {
+      "id": "REQ-19",
+      "text": "Enhance the Report Download feature in the Admin Dashboard to support custom date-range export in addition to the existing 'This Week' and 'This Month' options. Add a date range picker (start date and end date inputs) and an 'Export Custom Range' button. The exported CSV must follow the same column format as the existing exports (Task Title, Description, Assignee, Deadline, Priority, Status, Created At) and filter tasks whose deadline falls within the selected date range.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ],
+        "quotes": [
+          "The app should include a Report Download feature that allows users to download weekly, monthly, and custom date-wise task reports."
+        ]
+      },
+      "acceptanceCriteria": [
+        "The report export UI includes 'This Week', 'This Month', and a custom date range option.",
+        "Custom date range allows the admin to select a start date and end date.",
+        "Clicking 'Export Custom Range' generates and downloads a CSV with tasks whose deadline falls within the selected range.",
+        "The CSV includes columns: Task Title, Description, Assignee, Deadline, Priority, Status, Created At.",
+        "If no date range is selected, the export button is disabled or shows a validation message.",
+        "The filename reflects the custom range (e.g. tasks-2024-01-01-to-2024-01-31.csv)."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any file under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
-    "The Conference Name field must be optional — existing tasks without it must not break."
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
+    "All Motoko logic must remain in the single actor in backend/main.mo.",
+    "Carry Forward must be added as a proper status variant in the backend — do not simulate it only on the frontend."
   ],
   "nonGoals": [
-    "Making Conference Name a required field.",
-    "Adding conference-specific filtering or sorting logic.",
-    "Any other new features beyond adding this single field."
+    "WhatsApp or SMS reminders.",
+    "Authentication or role-based access control.",
+    "Multiple backend services or external databases.",
+    "QR code attendance tracking.",
+    "Full SaaS multi-tenant features."
   ],
   "imageRequirements": {
     "required": [],

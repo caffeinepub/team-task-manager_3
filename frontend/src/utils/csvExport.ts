@@ -24,6 +24,7 @@ function statusLabel(s: Status): string {
     case Status.Pending: return 'Pending';
     case Status.InProgress: return 'In Progress';
     case Status.Completed: return 'Completed';
+    case Status.CarryForward: return 'Carry Forward';
     default: return String(s);
   }
 }
@@ -85,4 +86,25 @@ export function filterTasksByCurrentMonth(tasks: Task[]): Task[] {
     const deadlineMs = Number(task.deadline) / 1_000_000;
     return deadlineMs >= startOfMonth.getTime() && deadlineMs < endOfMonth.getTime();
   });
+}
+
+export function filterTasksByCustomRange(tasks: Task[], startDate: Date, endDate: Date): Task[] {
+  const start = startDate.getTime();
+  // Include the full end day
+  const end = new Date(endDate);
+  end.setHours(23, 59, 59, 999);
+  const endMs = end.getTime();
+
+  return tasks.filter(task => {
+    const deadlineMs = Number(task.deadline) / 1_000_000;
+    return deadlineMs >= start && deadlineMs <= endMs;
+  });
+}
+
+export function exportCustomRangeTasks(tasks: Task[], startDate: Date, endDate: Date): void {
+  const filtered = filterTasksByCustomRange(tasks, startDate, endDate);
+  const csv = generateCsv(filtered);
+  const startStr = startDate.toISOString().split('T')[0];
+  const endStr = endDate.toISOString().split('T')[0];
+  downloadCsv(csv, `tasks-${startStr}-to-${endStr}.csv`);
 }

@@ -14,6 +14,7 @@ export const Priority = IDL.Variant({
   'Medium' : IDL.Null,
 });
 export const Status = IDL.Variant({
+  'CarryForward' : IDL.Null,
   'InProgress' : IDL.Null,
   'Completed' : IDL.Null,
   'Pending' : IDL.Null,
@@ -62,6 +63,7 @@ export const idlFactory = ({ IDL }) => {
     'Medium' : IDL.Null,
   });
   const Status = IDL.Variant({
+    'CarryForward' : IDL.Null,
     'InProgress' : IDL.Null,
     'Completed' : IDL.Null,
     'Pending' : IDL.Null,

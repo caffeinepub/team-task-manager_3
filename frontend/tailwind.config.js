@@ -77,6 +77,8 @@ export default {
                     warning: 'oklch(var(--urgency-warning))',
                     ok: 'oklch(var(--urgency-ok))',
                 },
+                // Carry Forward status color (purple/indigo)
+                'carry-forward': 'oklch(var(--carry-forward))',
             },
             borderRadius: {
                 lg: 'var(--radius)',

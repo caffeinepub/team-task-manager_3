@@ -1,34 +1,101 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add Conference Name field to Create Task modal",
+  "title": "Team Member Task View, Carry Forward Status, Enhanced Reports & Reminders",
   "requirements": [
     {
-      "id": "REQ-13",
-      "summary": "Add an optional 'Conference Name' text input field to the Create Task modal, wire it through the form submission, display it on task cards, and include it in CSV exports",
+      "id": "REQ-15",
+      "summary": "Add a Team Members section to the Admin Dashboard listing all team members with expandable task views and status summaries",
       "acceptanceCriteria": [
-        "The Create Task modal contains a text input field labeled 'Conference Name'.",
-        "The field is optional (submission is not blocked if left empty).",
-        "The field is positioned within the form in a logical order alongside existing fields.",
-        "The Conference Name value is included in the data submitted to the backend createTask mutation.",
-        "Existing task cards display the conference name if present.",
-        "The CSV export includes a 'Conference Name' column."
+        "Admin Dashboard shows a list of all team member names fetched from the backend.",
+        "Each team member name is clickable and reveals all tasks assigned to that person.",
+        "Below each team member name, a summary displays counts for Pending, In Progress, Completed, and Carry Forward statuses.",
+        "The task list per member is sorted by deadline then priority.",
+        "Each task in the expanded view shows its current status."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/CreateTaskModal.tsx",
+          "path": "frontend/src/components/TeamMemberCard.tsx",
+          "operation": "create",
+          "description": "Create a collapsible card component that displays a team member's name, status summary counts (Pending, In Progress, Completed, Carry Forward), and an expandable section showing all tasks assigned to that member sorted by deadline and priority using the taskSorting utility."
+        },
+        {
+          "path": "frontend/src/pages/AdminDashboard.tsx",
           "operation": "modify",
-          "description": "Add an optional 'Conference Name' text input field to the form, positioned between the title and description fields. Add state management for the conferenceName value (string). Include the conferenceName in the createTask mutation payload, passing it as a string or null to match the backend interface signature. Ensure the field is properly labeled and uses consistent styling with existing form inputs."
+          "description": "Add a 'Team Members' section below the existing task statistics. Fetch team members using useTeamMembersQuery and for each member, fetch their tasks using useTasksByAssigneeQuery. Render a list of TeamMemberCard components. Ensure the section is visually distinct from the main task list."
+        }
+      ]
+    },
+    {
+      "id": "REQ-17",
+      "summary": "Update task status controls to include Carry Forward as a selectable status with distinct purple/indigo styling",
+      "acceptanceCriteria": [
+        "Task cards display 'Carry Forward' as a selectable status in the status control.",
+        "Selecting 'Carry Forward' calls updateTaskStatus with the carry forward value and updates the UI immediately.",
+        "Carry Forward status is visually distinct from other statuses (e.g. purple/indigo color).",
+        "The status summary counts in REQ-15 include Carry Forward tasks."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/TaskStatusControl.tsx",
+          "operation": "modify",
+          "description": "Add 'Carry Forward' as a fourth option in the status select dropdown. Map the CarryForward enum value from the backend interface when calling the updateTaskStatus mutation. Apply purple/indigo color styling to the Carry Forward option."
         },
         {
           "path": "frontend/src/components/TaskCard.tsx",
           "operation": "modify",
-          "description": "Display the task's conferenceName field if present. Add a visual element (e.g., a badge or text line) that shows the conference name alongside existing task details such as priority, assignee, and deadline. Ensure the display is conditional and only renders when conferenceName is defined."
+          "description": "Ensure TaskCard displays the CarryForward status correctly when present. Add purple/indigo badge styling for tasks with CarryForward status, distinct from the existing Pending (yellow), InProgress (blue), and Completed (green) styles."
         },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Add custom color tokens for the Carry Forward status (purple/indigo variants) in the theme.extend.colors section to maintain consistency with the existing urgency and status color system."
+        }
+      ]
+    },
+    {
+      "id": "REQ-18",
+      "summary": "Add carry-forward task reminders to the in-app notification system with distinct urgency labeling",
+      "acceptanceCriteria": [
+        "Tasks with Carry Forward status appear in the notification bell panel.",
+        "They are labeled with a distinct urgency reason such as 'Carry Forward — needs attention'.",
+        "The notification badge count includes carry-forward tasks.",
+        "Carry-forward reminders are evaluated on page load and every 5 minutes."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useTaskReminders.ts",
+          "operation": "modify",
+          "description": "Add a new reminder category for carry-forward tasks. Filter tasks with CarryForward status and return them in a dedicated array. Include these tasks in the total reminder count calculation. Ensure the hook processes carry-forward reminders on every evaluation."
+        },
+        {
+          "path": "frontend/src/components/NotificationBell.tsx",
+          "operation": "modify",
+          "description": "Add a new section in the notification panel for carry-forward tasks. Display them with a distinct label 'Carry Forward — needs attention' and apply purple/indigo styling to differentiate from overdue, critical, and warning reminders. Include the carry-forward count in the badge total."
+        }
+      ]
+    },
+    {
+      "id": "REQ-19",
+      "summary": "Enhance report export to support custom date-range filtering in addition to existing week and month options",
+      "acceptanceCriteria": [
+        "The report export UI includes 'This Week', 'This Month', and a custom date range option.",
+        "Custom date range allows the admin to select a start date and end date.",
+        "Clicking 'Export Custom Range' generates and downloads a CSV with tasks whose deadline falls within the selected range.",
+        "The CSV includes columns: Task Title, Description, Assignee, Deadline, Priority, Status, Created At.",
+        "If no date range is selected, the export button is disabled or shows a validation message.",
+        "The filename reflects the custom range (e.g. tasks-2024-01-01-to-2024-01-31.csv)."
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/utils/csvExport.ts",
           "operation": "modify",
-          "description": "Add a 'Conference Name' column to the CSV export output. Update the CSV header row to include 'Conference Name' and ensure each task row includes the conferenceName value (or an empty string if undefined). Maintain the existing column order and format conventions."
+          "description": "Add a new function filterTasksByCustomRange that accepts start and end date parameters and filters tasks whose deadline falls within that range. Add a new function exportCustomRangeTasks that generates a CSV filename with the date range and calls downloadCSV with the filtered tasks."
+        },
+        {
+          "path": "frontend/src/components/ReportExportButtons.tsx",
+          "operation": "modify",
+          "description": "Add two date input fields (start date and end date) and an 'Export Custom Range' button. Disable the button if no dates are selected or if start date is after end date. On click, call the exportCustomRangeTasks function from csvExport utility with the selected date range. Maintain the existing 'This Week' and 'This Month' buttons."
         }
       ]
     }

@@ -24,6 +24,7 @@ export enum Priority {
     Medium = "Medium"
 }
 export enum Status {
+    CarryForward = "CarryForward",
     InProgress = "InProgress",
     Completed = "Completed",
     Pending = "Pending"

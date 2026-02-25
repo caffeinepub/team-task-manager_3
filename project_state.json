@@ -1,13 +1,16 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 5,
-  "summary": "Full-featured team task management app built with React + Motoko on the Internet Computer. Admin can create tasks with title, description, assignee, deadline, and priority (High/Medium/Low). Smart dashboard auto-sorts by deadline and priority with color-coded urgency, search, and team member filter. Includes in-app reminder notifications (24hr, 1hr, overdue), task status tracking (Pending/In Progress/Completed), team member view showing only assigned tasks, and CSV report export.",
+  "projectStateVersion": 9,
+  "summary": "Full-featured team task management app built with React + Motoko on the Internet Computer. Admin dashboard now shows a list of all team members; clicking a name reveals all assigned tasks with status summaries. Task statuses include Pending, In Progress, Completed, and a new 'Carry Forward' status. Admin can create tasks by selecting a team member, setting deadline and priority, and receives reminders for carry-forward tasks. Report downloads support weekly, monthly, and custom date-range exports. Smart dashboard auto-sorts by deadline and priority with color-coded urgency, search, and team member filter. Includes in-app reminder notifications (24hr, 1hr, overdue, carry-forward), and CSV report export.",
   "architectural_notes": [
     "Stack: React (frontend) + Motoko (backend) on Internet Computer (ICP)",
     "Two roles: Admin (full access) and Team Member (assigned tasks only)",
-    "Reminder notifications implemented as in-app alerts triggered by deadline proximity checks"
+    "Reminder notifications implemented as in-app alerts triggered by deadline proximity checks",
+    "Task status extended to include #CarryForward variant in addition to #Pending | #InProgress | #Completed"
   ],
-  "known_issues": [],
+  "known_issues": [
+    "No UI for adding or managing team members in the frontend"
+  ],
   "isFixRequest": false,
   "existing_features": [
     {
@@ -95,6 +98,46 @@
       "title": "Add an optional 'Conference Name' text input field to the Create Task modal form (CreateTaskModal.tsx). The field should appear between the task title and description fields, be labeled 'Conference Name', and its value must be stored and passed to the backend createTask call.",
       "reqIds": [
         "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-expose-the-existing-manageteammodal-component-in-the-admin-dashboard-by-adding-a-clearly-labeled-manage-team-button-or-equivalent-trigger-that-opens-the-modal-the-modal-must-allow-the-admin-to-1-view-the-current-list-of-team-members-fetched-via-getteammembers-2-add-a-new-team-member-by-name-using-the-addteammember-backend-call-and-3-remove-an-existing-team-member-using-the-removeteammember-backend-call-after-any-add-or-remove-action-the-team-member-list-and-the-assignee-dropdown-in-createtaskmodal-must-both-reflect-the-updated-roster-without-a-full-page-reload",
+      "title": "Expose the existing ManageTeamModal component in the Admin Dashboard by adding a clearly labeled 'Manage Team' button (or equivalent trigger) that opens the modal. The modal must allow the admin to: (1) view the current list of team members fetched via getTeamMembers, (2) add a new team member by name using the addTeamMember backend call, and (3) remove an existing team member using the removeTeamMember backend call. After any add or remove action, the team member list and the assignee dropdown in CreateTaskModal must both reflect the updated roster without a full page reload.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-team-members-section-to-the-admin-dashboard-that-lists-all-team-member-names-fetched-via-getteammembers-each-name-is-displayed-as-a-clickable-card-row-clicking-a-name-expands-or-navigates-to-show-all-tasks-assigned-to-that-person-fetched-via-gettasksbyassignee-or-filtered-from-getalltasks-below-each-team-member-s-name-display-a-status-summary-showing-counts-for-pending-in-progress-completed-and-carry-forward-tasks",
+      "title": "Add a 'Team Members' section to the Admin Dashboard that lists all team member names fetched via getTeamMembers. Each name is displayed as a clickable card/row. Clicking a name expands or navigates to show all tasks assigned to that person (fetched via getTasksByAssignee or filtered from getAllTasks). Below each team member's name, display a status summary showing counts for Pending, In Progress, Completed, and Carry Forward tasks.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-task-status-dropdown-control-in-taskcard-and-taskstatuscontrol-components-to-include-carry-forward-as-a-selectable-status-option-alongside-pending-in-progress-and-completed-apply-a-distinct-color-style-e-g-purple-indigo-to-the-carry-forward-status-badge-and-card",
+      "title": "Update the task status dropdown/control in TaskCard and TaskStatusControl components to include 'Carry Forward' as a selectable status option alongside Pending, In Progress, and Completed. Apply a distinct color style (e.g. purple/indigo) to the Carry Forward status badge and card.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-reminders-for-carry-forward-tasks-to-the-in-app-notification-system-tasks-with-a-carry-forward-status-should-appear-in-the-notificationbell-panel-with-a-distinct-urgency-label-e-g-carry-forward-needs-attention-these-should-be-evaluated-on-page-load-and-on-the-existing-5-minute-interval",
+      "title": "Add reminders for carry-forward tasks to the in-app notification system. Tasks with a 'Carry Forward' status should appear in the NotificationBell panel with a distinct urgency label (e.g. 'Carry Forward — needs attention'). These should be evaluated on page load and on the existing 5-minute interval.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enhance-the-report-download-feature-in-the-admin-dashboard-to-support-custom-date-range-export-in-addition-to-the-existing-this-week-and-this-month-options-add-a-date-range-picker-start-date-and-end-date-inputs-and-an-export-custom-range-button-the-exported-csv-must-follow-the-same-column-format-as-the-existing-exports-task-title-description-assignee-deadline-priority-status-created-at-and-filter-tasks-whose-deadline-falls-within-the-selected-date-range",
+      "title": "Enhance the Report Download feature in the Admin Dashboard to support custom date-range export in addition to the existing 'This Week' and 'This Month' options. Add a date range picker (start date and end date inputs) and an 'Export Custom Range' button. The exported CSV must follow the same column format as the existing exports (Task Title, Description, Assignee, Deadline, Priority, Status, Created At) and filter tasks whose deadline falls within the selected date range.",
+      "reqIds": [
+        "REQ-19"
       ],
       "version": 1
     }
@@ -186,6 +229,38 @@
       "id": "AR-14",
       "summary": "Add a 'Conference Name' field to the Create New Task form",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Add UI option to add/manage team members from the app (admin panel or settings)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Admin dashboard: show list of all team member names; clicking a name displays all tasks assigned to that person along with a status summary (Pending/In Progress/Completed/Carry Forward counts)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Add 'Carry Forward' as a new task status option alongside Pending, In Progress, Completed; admin receives reminders for carry-forward tasks",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Report Download feature: allow downloading task reports filtered by weekly, monthly, or custom date range",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-20",
+      "summary": "Add 'Carry Forward' as a new task status variant in the Motoko backend alongside the existing #Pending, #InProgress, and #Completed variants. Update the updateTaskStatus call to accept #CarryForward. Update all backend query responses to include this new status value.",
+      "reqIds": [
+        "REQ-16"
+      ],
       "status": "pending"
     }
   ],

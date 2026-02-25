@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, User, Trash2, ChevronDown, ChevronUp, Building2 } from 'lucide-react';
+import { Calendar, User, Trash2, ChevronDown, ChevronUp, Building2, RotateCcw } from 'lucide-react';
 import { type Task, Status } from '../backend';
 import { getUrgencyLevel, getCardClasses, getUrgencyBadgeClasses, getUrgencyLabel } from '../utils/taskUrgency';
 import PriorityBadge from './PriorityBadge';
@@ -41,6 +41,7 @@ export default function TaskCard({ task, showAssignee = true }: TaskCardProps) {
   const cardClasses = getCardClasses(urgency);
   const urgencyBadgeClasses = getUrgencyBadgeClasses(urgency);
   const isCompleted = task.status === Status.Completed;
+  const isCarryForward = task.status === Status.CarryForward;
   const deleteTask = useDeleteTask();
 
   const handleDelete = async () => {
@@ -54,7 +55,11 @@ export default function TaskCard({ task, showAssignee = true }: TaskCardProps) {
 
   return (
     <div
-      className={`rounded-xl border p-4 transition-all duration-200 hover:shadow-card-hover animate-fade-in ${cardClasses}`}
+      className={`rounded-xl border p-4 transition-all duration-200 hover:shadow-card-hover animate-fade-in ${
+        isCarryForward
+          ? 'border-carry-forward/40 bg-carry-forward/5'
+          : cardClasses
+      }`}
     >
       {/* Header row */}
       <div className="flex items-start justify-between gap-3">
@@ -69,9 +74,16 @@ export default function TaskCard({ task, showAssignee = true }: TaskCardProps) {
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <PriorityBadge priority={task.priority} />
-          <span className={`text-[10px] px-1.5 py-0.5 rounded-full border font-medium ${urgencyBadgeClasses}`}>
-            {getUrgencyLabel(urgency)}
-          </span>
+          {isCarryForward ? (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full border font-medium bg-carry-forward/15 text-carry-forward border-carry-forward/30 flex items-center gap-1">
+              <RotateCcw className="h-2.5 w-2.5" />
+              Carry Forward
+            </span>
+          ) : (
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full border font-medium ${urgencyBadgeClasses}`}>
+              {getUrgencyLabel(urgency)}
+            </span>
+          )}
         </div>
       </div>
 

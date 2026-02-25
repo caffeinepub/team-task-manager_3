@@ -1,9 +1,9 @@
-import Migration "migration";
 import Text "mo:core/Text";
 import List "mo:core/List";
 import Array "mo:core/Array";
 import Time "mo:core/Time";
 import Runtime "mo:core/Runtime";
+import Migration "migration";
 
 (with migration = Migration.run)
 actor {
@@ -17,6 +17,7 @@ actor {
     #InProgress;
     #Completed;
     #Pending;
+    #CarryForward;
   };
 
   type Task = {

@@ -14,6 +14,7 @@ const STATUS_CONFIG = {
   [Status.Pending]: { label: 'Pending', classes: 'text-muted-foreground' },
   [Status.InProgress]: { label: 'In Progress', classes: 'text-blue-400' },
   [Status.Completed]: { label: 'Completed', classes: 'text-green-400' },
+  [Status.CarryForward]: { label: 'Carry Forward', classes: 'text-carry-forward' },
 };
 
 export default function TaskStatusControl({ taskId, currentStatus }: TaskStatusControlProps) {
@@ -39,7 +40,7 @@ export default function TaskStatusControl({ taskId, currentStatus }: TaskStatusC
     <div className="relative flex items-center gap-1.5">
       {isUpdating && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
       <Select value={currentStatus} onValueChange={handleStatusChange} disabled={isUpdating}>
-        <SelectTrigger className="h-7 w-[130px] text-xs border-border/50 bg-secondary/50">
+        <SelectTrigger className="h-7 w-[140px] text-xs border-border/50 bg-secondary/50">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -59,6 +60,12 @@ export default function TaskStatusControl({ taskId, currentStatus }: TaskStatusC
             <span className="flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-green-400 inline-block" />
               Completed
+            </span>
+          </SelectItem>
+          <SelectItem value={Status.CarryForward} className="text-xs">
+            <span className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-carry-forward inline-block" />
+              Carry Forward
             </span>
           </SelectItem>
         </SelectContent>

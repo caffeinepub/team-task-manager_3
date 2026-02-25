@@ -13,7 +13,8 @@ import type { Principal } from '@icp-sdk/core/principal';
 export type Priority = { 'Low' : null } |
   { 'High' : null } |
   { 'Medium' : null };
-export type Status = { 'InProgress' : null } |
+export type Status = { 'CarryForward' : null } |
+  { 'InProgress' : null } |
   { 'Completed' : null } |
   { 'Pending' : null };
 export interface Task {
