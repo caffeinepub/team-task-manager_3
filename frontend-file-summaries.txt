@@ -1,0 +1,23 @@
+{
+  "frontend/src/index.css": "Dark-mode-first global CSS with OKLCH color tokens for a teal/cyan accent on deep charcoal background, Inter + Space Grotesk fonts, and urgency semantic color variables.",
+  "frontend/tailwind.config.js": "Extended Tailwind config with Inter/Space Grotesk font families, urgency color tokens, custom border radii, card shadows, and fade/slide-in animations.",
+  "frontend/src/App.tsx": "Root app component with TanStack Router (AdminDashboard at '/', TeamMemberView at '/my-tasks'), ThemeProvider (dark), and Sonner Toaster.",
+  "frontend/src/hooks/useQueries.ts": "All React Query hooks for backend operations including getAllTasks, getTeamMembers, getTasksByAssignee, createTask (now with conferenceName param), updateTaskStatus, deleteTask, addTeamMember, and removeTeamMember with proper cache invalidation.",
+  "frontend/src/utils/taskSorting.ts": "Utility to sort Task arrays by deadline ascending then priority (High > Medium > Low) as tiebreaker.",
+  "frontend/src/utils/taskUrgency.ts": "Urgency level calculation (overdue/critical/warning/normal/completed) and corresponding Tailwind CSS class getters for card borders, backgrounds, and badges.",
+  "frontend/src/utils/reminderLogic.ts": "Pure boolean utility functions to check if a task is overdue, due within 1 hour, or due within 24 hours (excluding completed tasks).",
+  "frontend/src/utils/csvExport.ts": "CSV generation with an added 'Conference Name' column, browser download trigger, and weekly/monthly deadline-based task filtering utilities.",
+  "frontend/src/hooks/useTaskFilters.ts": "Custom hook that filters a Task array by case-insensitive title search and exact assignee match, both applied simultaneously.",
+  "frontend/src/hooks/useTaskReminders.ts": "Custom hook that categorizes all non-completed tasks into overdue, dueInOneHour, and dueInTwentyFourHours arrays with a total count, using the 5-minute refetch interval from useGetAllTasks.",
+  "frontend/src/components/PriorityBadge.tsx": "Color-coded priority badge component (red/High, yellow/Medium, green/Low) with emoji indicators.",
+  "frontend/src/components/TaskStatusControl.tsx": "Inline status dropdown (Pending/In Progress/Completed) that calls updateTaskStatus mutation with loading state and toast feedback.",
+  "frontend/src/components/TaskCard.tsx": "Full task card with urgency-based border/background styling, priority badge, status control, expandable description, and a conditional conference name display (Building2 icon) in the meta row alongside assignee and deadline.",
+  "frontend/src/components/TaskFilters.tsx": "Search input and assignee dropdown filter bar with a clear-all button, wired via callback props.",
+  "frontend/src/components/CreateTaskModal.tsx": "Dialog form for creating tasks with title, conference name (optional), description, assignee select, datetime picker, and priority radio group; validates required fields and calls createTask mutation with the conferenceName value.",
+  "frontend/src/components/ManageTeamModal.tsx": "Dialog for adding/removing team members from the roster with inline form and list with delete buttons.",
+  "frontend/src/components/NotificationBell.tsx": "Bell icon with badge count that opens a floating panel grouping overdue, due-in-1hr, and due-in-24hr non-completed tasks with urgency labels.",
+  "frontend/src/components/ReportExportButtons.tsx": "Two buttons (Weekly/Monthly) that filter tasks by current week/month deadline and trigger CSV download in the browser.",
+  "frontend/src/components/Layout.tsx": "App shell with sticky header (logo, nav links, notification bell), main content area, and footer with caffeine.ai attribution.",
+  "frontend/src/pages/AdminDashboard.tsx": "Admin dashboard page with stats cards, task filters, sorted task list, and buttons to open Create Task and Manage Team modals plus report export.",
+  "frontend/src/pages/TeamMemberView.tsx": "Team member self-service page with member selector dropdown, per-member stats, and sorted/color-coded task list with status update capability."
+}

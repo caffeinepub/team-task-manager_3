@@ -1,0 +1,42 @@
+{
+  "kind": "build_request",
+  "title": "Add Conference Name field to Create Task modal",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-13",
+      "text": "Add an optional 'Conference Name' text input field to the Create Task modal form (CreateTaskModal.tsx). The field should appear between the task title and description fields, be labeled 'Conference Name', and its value must be stored and passed to the backend createTask call.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Under Create New Task\n\nAdd a field in the name of \"Conference Name\""
+        ]
+      },
+      "acceptanceCriteria": [
+        "The Create Task modal contains a text input field labeled 'Conference Name'.",
+        "The field is optional (submission is not blocked if left empty).",
+        "The field is positioned within the form in a logical order alongside existing fields.",
+        "The Conference Name value is included in the data submitted to the backend createTask mutation.",
+        "The backend Task data type and createTask function accept and store the new conferenceName field (optional Text).",
+        "Existing task cards display the conference name if present.",
+        "The CSV export includes a 'Conference Name' column."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not modify any file under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
+    "The Conference Name field must be optional — existing tasks without it must not break."
+  ],
+  "nonGoals": [
+    "Making Conference Name a required field.",
+    "Adding conference-specific filtering or sorting logic.",
+    "Any other new features beyond adding this single field."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

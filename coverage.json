@@ -1,0 +1,51 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-25T08:15:40.543Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 1,
+    "implemented": 1,
+    "items": [
+      {
+        "id": "REQ-13",
+        "summary": "Add an optional 'Conference Name' text input field to the Create Task modal form (CreateTaskModal.tsx). The field should appear between the task title and description fields, be labeled 'Conference Name', and its value must be stored and passed to the backend createTask call.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/CreateTaskModal.tsx",
+          "frontend/src/components/TaskCard.tsx",
+          "frontend/src/utils/csvExport.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/CreateTaskModal.tsx",
+          "frontend/src/components/TaskCard.tsx",
+          "frontend/src/utils/csvExport.ts"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
+    "build-request.json",
+    "build-template/README.md",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/CreateTaskModal.tsx",
+    "frontend/src/components/TaskCard.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/utils/csvExport.ts",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-add-an-optional-conference-name-text-input-field-to-the-create-task-modal-form-createtaskmodal-tsx-the-field-should-appear-between-the-task-title-and-description-fields-be-labeled-conference-name-and-its-value-must-be-stored-and-passed-to-the-backend-createtask-call",
+      "featureTitle": "Add an optional 'Conference Name' text input field to the Create Task modal form (CreateTaskModal.tsx). The field should appear between the task title and description fields, be labeled 'Conference Name', and its value must be stored and passed to the backend createTask call.",
+      "files": [
+        "frontend/src/components/CreateTaskModal.tsx",
+        "frontend/src/components/TaskCard.tsx",
+        "frontend/src/utils/csvExport.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-13"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

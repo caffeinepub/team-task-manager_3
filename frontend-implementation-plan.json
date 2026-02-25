@@ -1,0 +1,36 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Add Conference Name field to Create Task modal",
+  "requirements": [
+    {
+      "id": "REQ-13",
+      "summary": "Add an optional 'Conference Name' text input field to the Create Task modal, wire it through the form submission, display it on task cards, and include it in CSV exports",
+      "acceptanceCriteria": [
+        "The Create Task modal contains a text input field labeled 'Conference Name'.",
+        "The field is optional (submission is not blocked if left empty).",
+        "The field is positioned within the form in a logical order alongside existing fields.",
+        "The Conference Name value is included in the data submitted to the backend createTask mutation.",
+        "Existing task cards display the conference name if present.",
+        "The CSV export includes a 'Conference Name' column."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/CreateTaskModal.tsx",
+          "operation": "modify",
+          "description": "Add an optional 'Conference Name' text input field to the form, positioned between the title and description fields. Add state management for the conferenceName value (string). Include the conferenceName in the createTask mutation payload, passing it as a string or null to match the backend interface signature. Ensure the field is properly labeled and uses consistent styling with existing form inputs."
+        },
+        {
+          "path": "frontend/src/components/TaskCard.tsx",
+          "operation": "modify",
+          "description": "Display the task's conferenceName field if present. Add a visual element (e.g., a badge or text line) that shows the conference name alongside existing task details such as priority, assignee, and deadline. Ensure the display is conditional and only renders when conferenceName is defined."
+        },
+        {
+          "path": "frontend/src/utils/csvExport.ts",
+          "operation": "modify",
+          "description": "Add a 'Conference Name' column to the CSV export output. Update the CSV header row to include 'Conference Name' and ensure each task row includes the conferenceName value (or an empty string if undefined). Maintain the existing column order and format conventions."
+        }
+      ]
+    }
+  ]
+}

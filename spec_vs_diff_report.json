@@ -1,0 +1,28 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-25T08:15:40.539Z",
+  "summary": "The diff implements all acceptance criteria for REQ-13: the Conference Name field is added to CreateTaskModal.tsx (optional, between title and description), passed to the backend createTask mutation in useQueries.ts, stored in the backend Task type and createTask function in main.mo, displayed on TaskCard.tsx when present, included as a column in csvExport.ts, and a migration module handles existing tasks gracefully.",
+  "missing_requirements": [],
+  "hallucinated_features": [
+    {
+      "description": "A backend migration module (backend/migration.mo) was added to handle schema migration for existing tasks, setting conferenceName to null for old records.",
+      "reason": "The build request does not mention any migration module or data migration strategy. This is an additional implementation detail not requested.",
+      "evidence": [
+        "backend/migration.mo",
+        "backend/main.mo"
+      ]
+    }
+  ],
+  "confidence": 0.88,
+  "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
+    "frontend-file-summaries.txt",
+    "frontend/src/components/CreateTaskModal.tsx",
+    "frontend/src/components/TaskCard.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/utils/csvExport.ts",
+    "project_state.json"
+  ]
+}
