@@ -1,99 +1,48 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-25T09:33:41.066Z",
+  "generatedAt": "2026-02-26T06:42:20.019Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 4,
+    "total": 2,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-15",
-        "summary": "Add a 'Team Members' section to the Admin Dashboard that lists all team member names fetched via getTeamMembers. Each name is displayed as a clickable card/row. Clicking a name expands or navigates to show all tasks assigned to that person (fetched via getTasksByAssignee or filtered from getAllTasks). Below each team member's name, display a status summary showing counts for Pending, In Progress, Completed, and Carry Forward tasks.",
+        "id": "REQ-1",
+        "summary": "Ensure the 'Add Team Member' button is visible and functional on the Team Members page (frontend/src/pages/TeamMembers.tsx). The button should open the AddUserModal (frontend/src/components/AddUserModal.tsx) when clicked. Verify the button is rendered in the page header or toolbar area and is not hidden due to a missing condition, incorrect auth guard, or rendering bug.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/TeamMemberCard.tsx",
+          "frontend/src/pages/TeamMembers.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/TeamMembers.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Audit the AdminDashboard page (frontend/src/pages/AdminDashboard.tsx) team members tab to ensure the 'Add Team Member' action is also accessible from there if it was previously present. Fix any missing button, broken import, or incorrect conditional rendering that prevents it from showing.",
+        "status": "implemented",
+        "plannedFiles": [
           "frontend/src/pages/AdminDashboard.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/TeamMemberCard.tsx",
           "frontend/src/pages/AdminDashboard.tsx"
-        ]
-      },
-      {
-        "id": "REQ-16",
-        "summary": "Add 'Carry Forward' as a new task status variant in the Motoko backend alongside the existing #Pending, #InProgress, and #Completed variants. Update the updateTaskStatus call to accept #CarryForward. Update all backend query responses to include this new status value.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-17",
-        "summary": "Update the task status dropdown/control in TaskCard and TaskStatusControl components to include 'Carry Forward' as a selectable status option alongside Pending, In Progress, and Completed. Apply a distinct color style (e.g. purple/indigo) to the Carry Forward status badge and card.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/TaskStatusControl.tsx",
-          "frontend/src/components/TaskCard.tsx",
-          "frontend/tailwind.config.js"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/TaskStatusControl.tsx",
-          "frontend/src/components/TaskCard.tsx",
-          "frontend/tailwind.config.js"
-        ]
-      },
-      {
-        "id": "REQ-18",
-        "summary": "Add reminders for carry-forward tasks to the in-app notification system. Tasks with a 'Carry Forward' status should appear in the NotificationBell panel with a distinct urgency label (e.g. 'Carry Forward — needs attention'). These should be evaluated on page load and on the existing 5-minute interval.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useTaskReminders.ts",
-          "frontend/src/components/NotificationBell.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useTaskReminders.ts",
-          "frontend/src/components/NotificationBell.tsx"
-        ]
-      },
-      {
-        "id": "REQ-19",
-        "summary": "Enhance the Report Download feature in the Admin Dashboard to support custom date-range export in addition to the existing 'This Week' and 'This Month' options. Add a date range picker (start date and end date inputs) and an 'Export Custom Range' button. The exported CSV must follow the same column format as the existing exports (Task Title, Description, Assignee, Deadline, Priority, Status, Created At) and filter tasks whose deadline falls within the selected date range.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/utils/csvExport.ts",
-          "frontend/src/components/ReportExportButtons.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/utils/csvExport.ts",
-          "frontend/src/components/ReportExportButtons.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/NotificationBell.tsx",
-    "frontend/src/components/ReportExportButtons.tsx",
-    "frontend/src/components/TaskCard.tsx",
-    "frontend/src/components/TaskStatusControl.tsx",
-    "frontend/src/components/TeamMemberCard.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useTaskReminders.ts",
-    "frontend/src/index.css",
+    "frontend/src/contexts/AuthContext.tsx",
+    "frontend/src/hooks/useQueries.ts",
     "frontend/src/pages/AdminDashboard.tsx",
-    "frontend/src/utils/csvExport.ts",
-    "frontend/tailwind.config.js",
+    "frontend/src/pages/TeamMembers.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

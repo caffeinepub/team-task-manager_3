@@ -1,13 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Extend TaskFlow with a "Carry Forward" task status, a Team Members view in the Admin Dashboard, carry-forward notifications, and custom date-range report exports.
+**Goal:** Fix the missing "Add Team Member" button so it is visible and functional for admin users on both the Team Members page and the Admin Dashboard.
 
 **Planned changes:**
-- Add `#CarryForward` as a new task status variant in the Motoko backend; update `updateTaskStatus`, `getAllTasks`, and `getTasksByAssignee` to support it.
-- Add a "Team Members" section to the Admin Dashboard listing all team members as clickable cards; expanding a card shows all tasks assigned to that person sorted by deadline then priority, plus a status summary (Pending, In Progress, Completed, Carry Forward counts).
-- Add "Carry Forward" as a selectable status in TaskCard and TaskStatusControl dropdowns with a distinct purple/indigo color badge.
-- Add carry-forward task reminders to the NotificationBell panel, labeled "Carry Forward — needs attention", evaluated on page load and every 5 minutes.
-- Enhance the Report Download UI in the Admin Dashboard with a custom date-range picker (start date, end date) and an "Export Custom Range" button that exports a CSV filtered by deadline range with a filename reflecting the selected dates.
+- Restore the "Add Team Member" button in the Team Members page header/toolbar so it is visible to admin users and opens the AddUserModal when clicked
+- Audit and fix the Admin Dashboard team members tab to ensure the "Add Team Member" action is also present and correctly invokes the AddUserModal
+- Resolve any missing conditions, broken imports, or incorrect conditional rendering that caused the button to be hidden
 
-**User-visible outcome:** Admins can view per-member task summaries, mark tasks as "Carry Forward," receive in-app reminders for carry-forward tasks, and download task reports for any custom date range.
+**User-visible outcome:** Admin users can see and click the "Add Team Member" button on both the Team Members page and the Admin Dashboard team members tab, open the modal, and successfully add new team members.

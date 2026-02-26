@@ -1,101 +1,37 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Team Member Task View, Carry Forward Status, Enhanced Reports & Reminders",
+  "title": "Fix missing Add Team Member option in UI",
   "requirements": [
     {
-      "id": "REQ-15",
-      "summary": "Add a Team Members section to the Admin Dashboard listing all team members with expandable task views and status summaries",
+      "id": "REQ-1",
+      "summary": "Ensure the 'Add Team Member' button is visible and functional on the Team Members page",
       "acceptanceCriteria": [
-        "Admin Dashboard shows a list of all team member names fetched from the backend.",
-        "Each team member name is clickable and reveals all tasks assigned to that person.",
-        "Below each team member name, a summary displays counts for Pending, In Progress, Completed, and Carry Forward statuses.",
-        "The task list per member is sorted by deadline then priority.",
-        "Each task in the expanded view shows its current status."
+        "An 'Add Team Member' button is visible on the Team Members page when logged in as an admin",
+        "Clicking the button opens the AddUserModal dialog",
+        "The modal allows submitting a new user and the new member appears in the list after creation",
+        "The button does not appear for non-admin users if role-based visibility is intended"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/TeamMemberCard.tsx",
-          "operation": "create",
-          "description": "Create a collapsible card component that displays a team member's name, status summary counts (Pending, In Progress, Completed, Carry Forward), and an expandable section showing all tasks assigned to that member sorted by deadline and priority using the taskSorting utility."
-        },
+          "path": "frontend/src/pages/TeamMembers.tsx",
+          "operation": "modify",
+          "description": "Review the component to ensure the 'Add Team Member' button is rendered in the page header or toolbar. Check for any missing conditional logic, incorrect auth guards, or rendering bugs that prevent the button from displaying. Ensure the button has an onClick handler that opens the AddUserModal component. If the button is missing entirely, add it to the UI with proper styling consistent with other action buttons in the app. Verify the AddUserModal is properly imported and its state management (open/close) is correctly wired."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Audit the AdminDashboard team members tab to ensure 'Add Team Member' action is accessible",
+      "acceptanceCriteria": [
+        "The 'Add Team Member' option is visible in the team members tab of the Admin Dashboard",
+        "The option correctly invokes the AddUserModal"
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/pages/AdminDashboard.tsx",
           "operation": "modify",
-          "description": "Add a 'Team Members' section below the existing task statistics. Fetch team members using useTeamMembersQuery and for each member, fetch their tasks using useTasksByAssigneeQuery. Render a list of TeamMemberCard components. Ensure the section is visually distinct from the main task list."
-        }
-      ]
-    },
-    {
-      "id": "REQ-17",
-      "summary": "Update task status controls to include Carry Forward as a selectable status with distinct purple/indigo styling",
-      "acceptanceCriteria": [
-        "Task cards display 'Carry Forward' as a selectable status in the status control.",
-        "Selecting 'Carry Forward' calls updateTaskStatus with the carry forward value and updates the UI immediately.",
-        "Carry Forward status is visually distinct from other statuses (e.g. purple/indigo color).",
-        "The status summary counts in REQ-15 include Carry Forward tasks."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/TaskStatusControl.tsx",
-          "operation": "modify",
-          "description": "Add 'Carry Forward' as a fourth option in the status select dropdown. Map the CarryForward enum value from the backend interface when calling the updateTaskStatus mutation. Apply purple/indigo color styling to the Carry Forward option."
-        },
-        {
-          "path": "frontend/src/components/TaskCard.tsx",
-          "operation": "modify",
-          "description": "Ensure TaskCard displays the CarryForward status correctly when present. Add purple/indigo badge styling for tasks with CarryForward status, distinct from the existing Pending (yellow), InProgress (blue), and Completed (green) styles."
-        },
-        {
-          "path": "frontend/tailwind.config.js",
-          "operation": "modify",
-          "description": "Add custom color tokens for the Carry Forward status (purple/indigo variants) in the theme.extend.colors section to maintain consistency with the existing urgency and status color system."
-        }
-      ]
-    },
-    {
-      "id": "REQ-18",
-      "summary": "Add carry-forward task reminders to the in-app notification system with distinct urgency labeling",
-      "acceptanceCriteria": [
-        "Tasks with Carry Forward status appear in the notification bell panel.",
-        "They are labeled with a distinct urgency reason such as 'Carry Forward — needs attention'.",
-        "The notification badge count includes carry-forward tasks.",
-        "Carry-forward reminders are evaluated on page load and every 5 minutes."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useTaskReminders.ts",
-          "operation": "modify",
-          "description": "Add a new reminder category for carry-forward tasks. Filter tasks with CarryForward status and return them in a dedicated array. Include these tasks in the total reminder count calculation. Ensure the hook processes carry-forward reminders on every evaluation."
-        },
-        {
-          "path": "frontend/src/components/NotificationBell.tsx",
-          "operation": "modify",
-          "description": "Add a new section in the notification panel for carry-forward tasks. Display them with a distinct label 'Carry Forward — needs attention' and apply purple/indigo styling to differentiate from overdue, critical, and warning reminders. Include the carry-forward count in the badge total."
-        }
-      ]
-    },
-    {
-      "id": "REQ-19",
-      "summary": "Enhance report export to support custom date-range filtering in addition to existing week and month options",
-      "acceptanceCriteria": [
-        "The report export UI includes 'This Week', 'This Month', and a custom date range option.",
-        "Custom date range allows the admin to select a start date and end date.",
-        "Clicking 'Export Custom Range' generates and downloads a CSV with tasks whose deadline falls within the selected range.",
-        "The CSV includes columns: Task Title, Description, Assignee, Deadline, Priority, Status, Created At.",
-        "If no date range is selected, the export button is disabled or shows a validation message.",
-        "The filename reflects the custom range (e.g. tasks-2024-01-01-to-2024-01-31.csv)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/utils/csvExport.ts",
-          "operation": "modify",
-          "description": "Add a new function filterTasksByCustomRange that accepts start and end date parameters and filters tasks whose deadline falls within that range. Add a new function exportCustomRangeTasks that generates a CSV filename with the date range and calls downloadCSV with the filtered tasks."
-        },
-        {
-          "path": "frontend/src/components/ReportExportButtons.tsx",
-          "operation": "modify",
-          "description": "Add two date input fields (start date and end date) and an 'Export Custom Range' button. Disable the button if no dates are selected or if start date is after end date. On click, call the exportCustomRangeTasks function from csvExport utility with the selected date range. Maintain the existing 'This Week' and 'This Month' buttons."
+          "description": "Review the team members tab section of the AdminDashboard to check if an 'Add Team Member' button or action trigger exists. If missing, add the button with appropriate positioning and styling. Ensure the AddUserModal component is imported if not already present. Wire the button's onClick to open the AddUserModal. Verify that the button respects any existing conditional rendering or role-based visibility logic. Check for broken imports or incorrect component references that may have hidden the button."
         }
       ]
     }

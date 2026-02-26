@@ -1,271 +1,32 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 9,
-  "summary": "Full-featured team task management app built with React + Motoko on the Internet Computer. Admin dashboard now shows a list of all team members; clicking a name reveals all assigned tasks with status summaries. Task statuses include Pending, In Progress, Completed, and a new 'Carry Forward' status. Admin can create tasks by selecting a team member, setting deadline and priority, and receives reminders for carry-forward tasks. Report downloads support weekly, monthly, and custom date-range exports. Smart dashboard auto-sorts by deadline and priority with color-coded urgency, search, and team member filter. Includes in-app reminder notifications (24hr, 1hr, overdue, carry-forward), and CSV report export.",
-  "architectural_notes": [
-    "Stack: React (frontend) + Motoko (backend) on Internet Computer (ICP)",
-    "Two roles: Admin (full access) and Team Member (assigned tasks only)",
-    "Reminder notifications implemented as in-app alerts triggered by deadline proximity checks",
-    "Task status extended to include #CarryForward variant in addition to #Pending | #InProgress | #Completed"
-  ],
+  "projectStateVersion": 3,
+  "summary": "New project",
+  "architectural_notes": [],
   "known_issues": [
-    "No UI for adding or managing team members in the frontend"
+    "'Add Team Member' button/option is not showing up in the UI"
   ],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-build-an-admin-dashboard-page-default-route-that-fetches-all-tasks-via-getalltasks-and-displays-them-in-a-single-sorted-list-nearest-deadline-first-then-by-priority-high-before-medium-before-low-each-task-card-must-show-title-assignee-deadline-human-readable-date-time-priority-badge-and-current-status",
-      "title": "Build an Admin Dashboard page (default route '/') that fetches all tasks via getAllTasks and displays them in a single sorted list — nearest deadline first, then by priority (High before Medium before Low). Each task card must show: title, assignee, deadline (human-readable date/time), priority badge, and current status.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-apply-color-coded-urgency-styling-to-task-cards-overdue-tasks-use-red-background-border-tasks-due-within-24-hours-use-orange-amber-tasks-due-within-1-3-days-use-yellow-and-tasks-with-further-deadlines-use-the-default-neutral-style-priority-badges-must-also-be-color-coded-red-for-high-amber-yellow-for-medium-green-for-low",
-      "title": "Apply color-coded urgency styling to task cards: overdue tasks use red background/border, tasks due within 24 hours use orange/amber, tasks due within 1–3 days use yellow, and tasks with further deadlines use the default neutral style. Priority badges must also be color-coded: red for High, amber/yellow for Medium, green for Low.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-search-bar-and-a-team-member-filter-dropdown-to-the-admin-dashboard-the-search-bar-filters-the-visible-task-list-by-task-title-case-insensitive-the-dropdown-filters-by-assignee-both-filters-can-be-combined-simultaneously",
-      "title": "Add a search bar and a team-member filter dropdown to the Admin Dashboard. The search bar filters the visible task list by task title (case-insensitive). The dropdown filters by assignee. Both filters can be combined simultaneously.",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-provide-a-create-task-modal-form-accessible-from-the-admin-dashboard-the-form-must-include-task-title-required-text-input-description-optional-textarea-assignee-selector-populated-from-getteammembers-deadline-date-and-time-picker-and-priority-selector-high-medium-low-on-submit-call-createtask-and-refresh-the-dashboard",
-      "title": "Provide a 'Create Task' modal/form accessible from the Admin Dashboard. The form must include: task title (required text input), description (optional textarea), assignee selector (populated from getTeamMembers), deadline date-and-time picker, and priority selector (High / Medium / Low). On submit, call createTask and refresh the dashboard.",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-an-in-app-notification-reminder-system-on-the-frontend-on-page-load-and-on-a-recurring-interval-every-5-minutes-evaluate-all-tasks-against-the-current-time-and-surface-in-app-alerts-for-a-tasks-with-a-deadline-within-the-next-24-hours-that-are-not-yet-completed-b-tasks-with-a-deadline-within-the-next-1-hour-that-are-not-yet-completed-c-tasks-that-are-past-their-deadline-and-not-completed-overdue-display-these-as-a-notification-bell-icon-with-a-badge-count-in-the-header-clicking-it-opens-a-panel-listing-the-relevant-tasks-with-their-urgency-reason",
-      "title": "Implement an in-app notification/reminder system on the frontend. On page load and on a recurring interval (every 5 minutes), evaluate all tasks against the current time and surface in-app alerts for: (a) tasks with a deadline within the next 24 hours that are not yet Completed, (b) tasks with a deadline within the next 1 hour that are not yet Completed, (c) tasks that are past their deadline and not Completed (overdue). Display these as a notification bell icon with a badge count in the header; clicking it opens a panel listing the relevant tasks with their urgency reason.",
-      "reqIds": [
-        "REQ-7"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-status-update-capability-to-every-task-card-a-dropdown-or-button-group-allowing-selection-of-pending-in-progress-or-completed-selecting-a-new-status-calls-updatetaskstatus-on-the-backend-and-immediately-reflects-the-change-in-the-ui",
-      "title": "Add status update capability to every task card: a dropdown or button group allowing selection of Pending, In Progress, or Completed. Selecting a new status calls updateTaskStatus on the backend and immediately reflects the change in the UI.",
-      "reqIds": [
-        "REQ-8"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-a-team-member-view-page-route-my-tasks-where-a-user-selects-their-name-from-a-dropdown-since-there-is-no-authentication-and-sees-only-the-tasks-assigned-to-them-the-list-must-be-sorted-by-deadline-then-priority-show-deadlines-urgency-color-coding-and-allow-status-updates-mark-in-progress-completed",
-      "title": "Create a Team Member View page (route '/my-tasks') where a user selects their name from a dropdown (since there is no authentication) and sees only the tasks assigned to them. The list must be sorted by deadline then priority, show deadlines, urgency color-coding, and allow status updates (mark In Progress / Completed).",
-      "reqIds": [
-        "REQ-9"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-a-csv-report-export-feature-accessible-from-the-admin-dashboard-provide-buttons-to-export-this-week-and-this-month-reports-each-csv-file-must-include-columns-task-title-description-assignee-deadline-priority-status-created-at-filter-exported-tasks-by-the-selected-time-range-based-on-their-deadline-date",
-      "title": "Implement a CSV report export feature accessible from the Admin Dashboard. Provide buttons to export 'This Week' and 'This Month' reports. Each CSV file must include columns: Task Title, Description, Assignee, Deadline, Priority, Status, Created At. Filter exported tasks by the selected time range based on their deadline date.",
-      "reqIds": [
-        "REQ-10"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-design-and-apply-a-cohesive-dark-mode-first-visual-theme-across-the-entire-app-use-a-deep-charcoal-slate-background-with-crisp-white-typography-accent-colors-of-teal-cyan-for-interactive-elements-and-a-clean-card-based-layout-typography-should-be-modern-sans-serif-navigation-should-include-a-top-header-with-app-logo-name-a-bell-notification-icon-and-links-to-admin-dashboard-and-team-member-view",
-      "title": "Design and apply a cohesive dark-mode-first visual theme across the entire app. Use a deep charcoal/slate background with crisp white typography, accent colors of teal/cyan for interactive elements, and a clean card-based layout. Typography should be modern sans-serif. Navigation should include a top header with app logo/name, a bell notification icon, and links to Admin Dashboard and Team Member View.",
-      "reqIds": [
-        "REQ-11"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-generate-and-display-a-custom-app-logo-wordmark-image-in-the-top-navigation-header-as-a-static-asset",
-      "title": "Generate and display a custom app logo/wordmark image in the top navigation header as a static asset.",
-      "reqIds": [
-        "REQ-12"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-an-optional-conference-name-text-input-field-to-the-create-task-modal-form-createtaskmodal-tsx-the-field-should-appear-between-the-task-title-and-description-fields-be-labeled-conference-name-and-its-value-must-be-stored-and-passed-to-the-backend-createtask-call",
-      "title": "Add an optional 'Conference Name' text input field to the Create Task modal form (CreateTaskModal.tsx). The field should appear between the task title and description fields, be labeled 'Conference Name', and its value must be stored and passed to the backend createTask call.",
-      "reqIds": [
-        "REQ-13"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-expose-the-existing-manageteammodal-component-in-the-admin-dashboard-by-adding-a-clearly-labeled-manage-team-button-or-equivalent-trigger-that-opens-the-modal-the-modal-must-allow-the-admin-to-1-view-the-current-list-of-team-members-fetched-via-getteammembers-2-add-a-new-team-member-by-name-using-the-addteammember-backend-call-and-3-remove-an-existing-team-member-using-the-removeteammember-backend-call-after-any-add-or-remove-action-the-team-member-list-and-the-assignee-dropdown-in-createtaskmodal-must-both-reflect-the-updated-roster-without-a-full-page-reload",
-      "title": "Expose the existing ManageTeamModal component in the Admin Dashboard by adding a clearly labeled 'Manage Team' button (or equivalent trigger) that opens the modal. The modal must allow the admin to: (1) view the current list of team members fetched via getTeamMembers, (2) add a new team member by name using the addTeamMember backend call, and (3) remove an existing team member using the removeTeamMember backend call. After any add or remove action, the team member list and the assignee dropdown in CreateTaskModal must both reflect the updated roster without a full page reload.",
-      "reqIds": [
-        "REQ-14"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-team-members-section-to-the-admin-dashboard-that-lists-all-team-member-names-fetched-via-getteammembers-each-name-is-displayed-as-a-clickable-card-row-clicking-a-name-expands-or-navigates-to-show-all-tasks-assigned-to-that-person-fetched-via-gettasksbyassignee-or-filtered-from-getalltasks-below-each-team-member-s-name-display-a-status-summary-showing-counts-for-pending-in-progress-completed-and-carry-forward-tasks",
-      "title": "Add a 'Team Members' section to the Admin Dashboard that lists all team member names fetched via getTeamMembers. Each name is displayed as a clickable card/row. Clicking a name expands or navigates to show all tasks assigned to that person (fetched via getTasksByAssignee or filtered from getAllTasks). Below each team member's name, display a status summary showing counts for Pending, In Progress, Completed, and Carry Forward tasks.",
-      "reqIds": [
-        "REQ-15"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-task-status-dropdown-control-in-taskcard-and-taskstatuscontrol-components-to-include-carry-forward-as-a-selectable-status-option-alongside-pending-in-progress-and-completed-apply-a-distinct-color-style-e-g-purple-indigo-to-the-carry-forward-status-badge-and-card",
-      "title": "Update the task status dropdown/control in TaskCard and TaskStatusControl components to include 'Carry Forward' as a selectable status option alongside Pending, In Progress, and Completed. Apply a distinct color style (e.g. purple/indigo) to the Carry Forward status badge and card.",
-      "reqIds": [
-        "REQ-17"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-reminders-for-carry-forward-tasks-to-the-in-app-notification-system-tasks-with-a-carry-forward-status-should-appear-in-the-notificationbell-panel-with-a-distinct-urgency-label-e-g-carry-forward-needs-attention-these-should-be-evaluated-on-page-load-and-on-the-existing-5-minute-interval",
-      "title": "Add reminders for carry-forward tasks to the in-app notification system. Tasks with a 'Carry Forward' status should appear in the NotificationBell panel with a distinct urgency label (e.g. 'Carry Forward — needs attention'). These should be evaluated on page load and on the existing 5-minute interval.",
-      "reqIds": [
-        "REQ-18"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-enhance-the-report-download-feature-in-the-admin-dashboard-to-support-custom-date-range-export-in-addition-to-the-existing-this-week-and-this-month-options-add-a-date-range-picker-start-date-and-end-date-inputs-and-an-export-custom-range-button-the-exported-csv-must-follow-the-same-column-format-as-the-existing-exports-task-title-description-assignee-deadline-priority-status-created-at-and-filter-tasks-whose-deadline-falls-within-the-selected-date-range",
-      "title": "Enhance the Report Download feature in the Admin Dashboard to support custom date-range export in addition to the existing 'This Week' and 'This Month' options. Add a date range picker (start date and end date inputs) and an 'Export Custom Range' button. The exported CSV must follow the same column format as the existing exports (Task Title, Description, Assignee, Deadline, Priority, Status, Created At) and filter tasks whose deadline falls within the selected date range.",
-      "reqIds": [
-        "REQ-19"
-      ],
-      "version": 1
-    }
-  ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Task assignment: create tasks with title, description, assignee, deadline, priority (High/Medium/Low)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Smart dashboard: all tasks sorted by nearest deadline then priority with color-coded urgency",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Search tasks by name and filter by team member on dashboard",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Reminder system: in-app notifications 24hr before, 1hr before deadline, and overdue alerts",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Task status tracking: Pending / In Progress / Completed, updatable by admin and team members",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Team member view: filtered to only assigned tasks with deadline visibility and status update option",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-7",
-      "summary": "Export weekly/monthly reports as CSV",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "WhatsApp reminder integration (future roadmap)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-9",
-      "summary": "Conference management version (future roadmap)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-10",
-      "summary": "Attendance tracking + QR check-in (future roadmap)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-11",
-      "summary": "Full SaaS version (future roadmap)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-12",
-      "summary": "Create a Motoko backend actor that stores tasks with the following fields: id (Nat), title (Text), description (optional Text), assignedTo (Text — team member name or ID), deadline (Int — Unix timestamp), priority (variant: #High | #Medium | #Low), status (variant: #Pending | #InProgress | #Completed), createdAt (Int). Provide CRUD operations: createTask, updateTaskStatus, deleteTask, getAllTasks, getTasksByAssignee.",
+      "id": "feature-ensure-the-add-team-member-button-is-visible-and-functional-on-the-team-members-page-frontend-src-pages-teammembers-tsx-the-button-should-open-the-addusermodal-frontend-src-components-addusermodal-tsx-when-clicked-verify-the-button-is-rendered-in-the-page-header-or-toolbar-area-and-is-not-hidden-due-to-a-missing-condition-incorrect-auth-guard-or-rendering-bug",
+      "title": "Ensure the 'Add Team Member' button is visible and functional on the Team Members page (frontend/src/pages/TeamMembers.tsx). The button should open the AddUserModal (frontend/src/components/AddUserModal.tsx) when clicked. Verify the button is rendered in the page header or toolbar area and is not hidden due to a missing condition, incorrect auth guard, or rendering bug.",
       "reqIds": [
         "REQ-1"
       ],
-      "status": "pending"
+      "version": 1
     },
     {
-      "id": "AR-13",
-      "summary": "Store team members in the backend as a list of names/identifiers. Provide addTeamMember, removeTeamMember, and getTeamMembers calls so the admin can manage the roster and use it when assigning tasks.",
+      "id": "feature-audit-the-admindashboard-page-frontend-src-pages-admindashboard-tsx-team-members-tab-to-ensure-the-add-team-member-action-is-also-accessible-from-there-if-it-was-previously-present-fix-any-missing-button-broken-import-or-incorrect-conditional-rendering-that-prevents-it-from-showing",
+      "title": "Audit the AdminDashboard page (frontend/src/pages/AdminDashboard.tsx) team members tab to ensure the 'Add Team Member' action is also accessible from there if it was previously present. Fix any missing button, broken import, or incorrect conditional rendering that prevents it from showing.",
       "reqIds": [
         "REQ-2"
       ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-14",
-      "summary": "Add a 'Conference Name' field to the Create New Task form",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-15",
-      "summary": "Add UI option to add/manage team members from the app (admin panel or settings)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-16",
-      "summary": "Admin dashboard: show list of all team member names; clicking a name displays all tasks assigned to that person along with a status summary (Pending/In Progress/Completed/Carry Forward counts)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-17",
-      "summary": "Add 'Carry Forward' as a new task status option alongside Pending, In Progress, Completed; admin receives reminders for carry-forward tasks",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-18",
-      "summary": "Report Download feature: allow downloading task reports filtered by weekly, monthly, or custom date range",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-20",
-      "summary": "Add 'Carry Forward' as a new task status variant in the Motoko backend alongside the existing #Pending, #InProgress, and #Completed variants. Update the updateTaskStatus call to accept #CarryForward. Update all backend query responses to include this new status value.",
-      "reqIds": [
-        "REQ-16"
-      ],
-      "status": "pending"
+      "version": 1
     }
   ],
-  "gameProjectType": "none",
-  "projectName": "Team Task Manager",
+  "new_feature_requests": [],
+  "projectName": "Fix missing Add Team Member option in UI",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -2,10 +2,28 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-team-members-section-to-the-admin-dashboard-that-lists-all-team-member-names-fetched-via-getteammembers-each-name-is-displayed-as-a-clickable-card-row-clicking-a-name-expands-or-navigates-to-show-all-tasks-assigned-to-that-person-fetched-via-gettasksbyassignee-or-filtered-from-getalltasks-below-each-team-member-s-name-display-a-status-summary-showing-counts-for-pending-in-progress-completed-and-carry-forward-tasks",
-      "featureTitle": "Add a 'Team Members' section to the Admin Dashboard that lists all team member names fetched via getTeamMembers. Each name is displayed as a clickable card/row. Clicking a name expands or navigates to show all tasks assigned to that person (fetched via getTasksByAssignee or filtered from getAllTasks). Below each team member's name, display a status summary showing counts for Pending, In Progress, Completed, and Carry Forward tasks.",
+      "featureId": "feature-ensure-the-add-team-member-button-is-visible-and-functional-on-the-team-members-page-frontend-src-pages-teammembers-tsx-the-button-should-open-the-addusermodal-frontend-src-components-addusermodal-tsx-when-clicked-verify-the-button-is-rendered-in-the-page-header-or-toolbar-area-and-is-not-hidden-due-to-a-missing-condition-incorrect-auth-guard-or-rendering-bug",
+      "featureTitle": "Ensure the 'Add Team Member' button is visible and functional on the Team Members page (frontend/src/pages/TeamMembers.tsx). The button should open the AddUserModal (frontend/src/components/AddUserModal.tsx) when clicked. Verify the button is rendered in the page header or toolbar area and is not hidden due to a missing condition, incorrect auth guard, or rendering bug.",
       "files": [
-        "frontend/src/components/TeamMemberCard.tsx",
+        "frontend/src/pages/TeamMembers.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-audit-the-admindashboard-page-frontend-src-pages-admindashboard-tsx-team-members-tab-to-ensure-the-add-team-member-action-is-also-accessible-from-there-if-it-was-previously-present-fix-any-missing-button-broken-import-or-incorrect-conditional-rendering-that-prevents-it-from-showing",
+      "featureTitle": "Audit the AdminDashboard page (frontend/src/pages/AdminDashboard.tsx) team members tab to ensure the 'Add Team Member' action is also accessible from there if it was previously present. Fix any missing button, broken import, or incorrect conditional rendering that prevents it from showing.",
+      "files": [
         "frontend/src/pages/AdminDashboard.tsx"
       ],
       "components": [
@@ -13,68 +31,11 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-15"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-task-status-dropdown-control-in-taskcard-and-taskstatuscontrol-components-to-include-carry-forward-as-a-selectable-status-option-alongside-pending-in-progress-and-completed-apply-a-distinct-color-style-e-g-purple-indigo-to-the-carry-forward-status-badge-and-card",
-      "featureTitle": "Update the task status dropdown/control in TaskCard and TaskStatusControl components to include 'Carry Forward' as a selectable status option alongside Pending, In Progress, and Completed. Apply a distinct color style (e.g. purple/indigo) to the Carry Forward status badge and card.",
-      "files": [
-        "frontend/src/components/TaskCard.tsx",
-        "frontend/src/components/TaskStatusControl.tsx",
-        "frontend/tailwind.config.js"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-17"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-reminders-for-carry-forward-tasks-to-the-in-app-notification-system-tasks-with-a-carry-forward-status-should-appear-in-the-notificationbell-panel-with-a-distinct-urgency-label-e-g-carry-forward-needs-attention-these-should-be-evaluated-on-page-load-and-on-the-existing-5-minute-interval",
-      "featureTitle": "Add reminders for carry-forward tasks to the in-app notification system. Tasks with a 'Carry Forward' status should appear in the NotificationBell panel with a distinct urgency label (e.g. 'Carry Forward — needs attention'). These should be evaluated on page load and on the existing 5-minute interval.",
-      "files": [
-        "frontend/src/components/NotificationBell.tsx",
-        "frontend/src/hooks/useTaskReminders.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-18"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-enhance-the-report-download-feature-in-the-admin-dashboard-to-support-custom-date-range-export-in-addition-to-the-existing-this-week-and-this-month-options-add-a-date-range-picker-start-date-and-end-date-inputs-and-an-export-custom-range-button-the-exported-csv-must-follow-the-same-column-format-as-the-existing-exports-task-title-description-assignee-deadline-priority-status-created-at-and-filter-tasks-whose-deadline-falls-within-the-selected-date-range",
-      "featureTitle": "Enhance the Report Download feature in the Admin Dashboard to support custom date-range export in addition to the existing 'This Week' and 'This Month' options. Add a date range picker (start date and end date inputs) and an 'Export Custom Range' button. The exported CSV must follow the same column format as the existing exports (Task Title, Description, Assignee, Deadline, Priority, Status, Created At) and filter tasks whose deadline falls within the selected date range.",
-      "files": [
-        "frontend/src/components/ReportExportButtons.tsx",
-        "frontend/src/utils/csvExport.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-19"
+        "REQ-2"
       ],
       "confidence": "high"
     }

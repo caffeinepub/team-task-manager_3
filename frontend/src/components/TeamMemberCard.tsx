@@ -30,7 +30,7 @@ function StatusSummary({ tasks }: StatusSummaryProps) {
         </span>
       )}
       {completed > 0 && (
-        <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-green-500/15 text-green-400 border border-green-500/20">
+        <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
           <CheckCircle2 className="h-2.5 w-2.5" />
           {completed} Completed
         </span>
@@ -65,18 +65,18 @@ export default function TeamMemberCard({ memberName }: TeamMemberCardProps) {
     .slice(0, 2);
 
   return (
-    <div className="rounded-xl border border-border/50 bg-card overflow-hidden transition-all duration-200">
+    <div className="rounded-2xl border border-border/50 bg-card overflow-hidden transition-all duration-200 shadow-card hover:shadow-card-hover">
       {/* Member header — always visible */}
       <button
         onClick={() => setExpanded(v => !v)}
-        className="w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors text-left"
+        className="w-full flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-secondary/30 transition-colors text-left"
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="h-9 w-9 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold font-display shrink-0">
+          <div className="h-10 w-10 rounded-xl bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">
             {initials}
           </div>
           <div className="min-w-0">
-            <p className="font-display font-semibold text-sm text-foreground truncate">{memberName}</p>
+            <p className="font-bold text-sm text-foreground truncate">{memberName}</p>
             {isLoading ? (
               <span className="text-[10px] text-muted-foreground">Loading tasks…</span>
             ) : (

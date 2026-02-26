@@ -8,6 +8,23 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const Role = IDL.Variant({
+  'Admin' : IDL.Null,
+  'TeamMember' : IDL.Null,
+});
+export const User = IDL.Record({
+  'id' : IDL.Nat,
+  'name' : IDL.Text,
+  'createdAt' : IDL.Int,
+  'role' : Role,
+  'email' : IDL.Text,
+  'passwordHash' : IDL.Text,
+});
+export const UserRole = IDL.Variant({
+  'admin' : IDL.Null,
+  'user' : IDL.Null,
+  'guest' : IDL.Null,
+});
 export const Priority = IDL.Variant({
   'Low' : IDL.Null,
   'High' : IDL.Null,
@@ -30,12 +47,36 @@ export const Task = IDL.Record({
   'deadline' : IDL.Int,
   'priority' : Priority,
 });
+export const ActivityEntry = IDL.Record({
+  'id' : IDL.Nat,
+  'actorName' : IDL.Text,
+  'actionType' : IDL.Variant({
+    'Login' : IDL.Null,
+    'StatusChanged' : IDL.Null,
+    'TaskEdited' : IDL.Null,
+    'TaskCreated' : IDL.Null,
+    'TaskDeleted' : IDL.Null,
+  }),
+  'taskTitle' : IDL.Text,
+  'description' : IDL.Text,
+  'taskId' : IDL.Nat,
+  'timestamp' : IDL.Int,
+  'actorEmail' : IDL.Text,
+});
+export const UserProfile = IDL.Record({
+  'name' : IDL.Text,
+  'role' : Role,
+  'email' : IDL.Text,
+});
 
 export const idlService = IDL.Service({
+  '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'addTeamMember' : IDL.Func([IDL.Text], [], []),
+  'addUser' : IDL.Func([IDL.Text, IDL.Text, IDL.Text, Role], [User], []),
+  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'assignUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'createTask' : IDL.Func(
       [
-        IDL.Nat,
         IDL.Text,
         IDL.Opt(IDL.Text),
         IDL.Opt(IDL.Text),
@@ -43,20 +84,84 @@ export const idlService = IDL.Service({
         IDL.Int,
         Priority,
       ],
-      [],
+      [Task],
       [],
     ),
   'deleteTask' : IDL.Func([IDL.Nat], [], []),
+  'deleteUser' : IDL.Func([IDL.Text], [], []),
+  'editTask' : IDL.Func(
+      [
+        IDL.Nat,
+        IDL.Text,
+        IDL.Opt(IDL.Text),
+        IDL.Text,
+        IDL.Int,
+        Priority,
+        IDL.Opt(IDL.Text),
+      ],
+      [Task],
+      [],
+    ),
+  'getActivityLogsByDateRange' : IDL.Func(
+      [IDL.Int, IDL.Int],
+      [IDL.Vec(ActivityEntry)],
+      ['query'],
+    ),
+  'getActivityLogsByTask' : IDL.Func(
+      [IDL.Nat],
+      [IDL.Vec(ActivityEntry)],
+      ['query'],
+    ),
+  'getActivityLogsByUser' : IDL.Func(
+      [IDL.Text],
+      [IDL.Vec(ActivityEntry)],
+      ['query'],
+    ),
+  'getAllActivityLogs' : IDL.Func([], [IDL.Vec(ActivityEntry)], ['query']),
   'getAllTasks' : IDL.Func([], [IDL.Vec(Task)], ['query']),
+  'getAllUsers' : IDL.Func([], [IDL.Vec(User)], ['query']),
+  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+  'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getRecentLoginEvents' : IDL.Func(
+      [IDL.Int, IDL.Int],
+      [IDL.Vec(ActivityEntry)],
+      ['query'],
+    ),
   'getTasksByAssignee' : IDL.Func([IDL.Text], [IDL.Vec(Task)], ['query']),
   'getTeamMembers' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
+  'getUserByEmail' : IDL.Func([IDL.Text], [IDL.Opt(User)], ['query']),
+  'getUserProfile' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Opt(UserProfile)],
+      ['query'],
+    ),
+  'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'loginUser' : IDL.Func([IDL.Text, IDL.Text], [User], []),
+  'registerUser' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [User], []),
   'removeTeamMember' : IDL.Func([IDL.Text], [], []),
+  'requestPasswordReset' : IDL.Func([IDL.Text], [IDL.Text], []),
+  'resetPassword' : IDL.Func([IDL.Text, IDL.Text], [], []),
+  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'updateTaskStatus' : IDL.Func([IDL.Nat, Status], [], []),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const Role = IDL.Variant({ 'Admin' : IDL.Null, 'TeamMember' : IDL.Null });
+  const User = IDL.Record({
+    'id' : IDL.Nat,
+    'name' : IDL.Text,
+    'createdAt' : IDL.Int,
+    'role' : Role,
+    'email' : IDL.Text,
+    'passwordHash' : IDL.Text,
+  });
+  const UserRole = IDL.Variant({
+    'admin' : IDL.Null,
+    'user' : IDL.Null,
+    'guest' : IDL.Null,
+  });
   const Priority = IDL.Variant({
     'Low' : IDL.Null,
     'High' : IDL.Null,
@@ -79,12 +184,36 @@ export const idlFactory = ({ IDL }) => {
     'deadline' : IDL.Int,
     'priority' : Priority,
   });
+  const ActivityEntry = IDL.Record({
+    'id' : IDL.Nat,
+    'actorName' : IDL.Text,
+    'actionType' : IDL.Variant({
+      'Login' : IDL.Null,
+      'StatusChanged' : IDL.Null,
+      'TaskEdited' : IDL.Null,
+      'TaskCreated' : IDL.Null,
+      'TaskDeleted' : IDL.Null,
+    }),
+    'taskTitle' : IDL.Text,
+    'description' : IDL.Text,
+    'taskId' : IDL.Nat,
+    'timestamp' : IDL.Int,
+    'actorEmail' : IDL.Text,
+  });
+  const UserProfile = IDL.Record({
+    'name' : IDL.Text,
+    'role' : Role,
+    'email' : IDL.Text,
+  });
   
   return IDL.Service({
+    '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'addTeamMember' : IDL.Func([IDL.Text], [], []),
+    'addUser' : IDL.Func([IDL.Text, IDL.Text, IDL.Text, Role], [User], []),
+    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'assignUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'createTask' : IDL.Func(
         [
-          IDL.Nat,
           IDL.Text,
           IDL.Opt(IDL.Text),
           IDL.Opt(IDL.Text),
@@ -92,14 +221,64 @@ export const idlFactory = ({ IDL }) => {
           IDL.Int,
           Priority,
         ],
-        [],
+        [Task],
         [],
       ),
     'deleteTask' : IDL.Func([IDL.Nat], [], []),
+    'deleteUser' : IDL.Func([IDL.Text], [], []),
+    'editTask' : IDL.Func(
+        [
+          IDL.Nat,
+          IDL.Text,
+          IDL.Opt(IDL.Text),
+          IDL.Text,
+          IDL.Int,
+          Priority,
+          IDL.Opt(IDL.Text),
+        ],
+        [Task],
+        [],
+      ),
+    'getActivityLogsByDateRange' : IDL.Func(
+        [IDL.Int, IDL.Int],
+        [IDL.Vec(ActivityEntry)],
+        ['query'],
+      ),
+    'getActivityLogsByTask' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Vec(ActivityEntry)],
+        ['query'],
+      ),
+    'getActivityLogsByUser' : IDL.Func(
+        [IDL.Text],
+        [IDL.Vec(ActivityEntry)],
+        ['query'],
+      ),
+    'getAllActivityLogs' : IDL.Func([], [IDL.Vec(ActivityEntry)], ['query']),
     'getAllTasks' : IDL.Func([], [IDL.Vec(Task)], ['query']),
+    'getAllUsers' : IDL.Func([], [IDL.Vec(User)], ['query']),
+    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+    'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getRecentLoginEvents' : IDL.Func(
+        [IDL.Int, IDL.Int],
+        [IDL.Vec(ActivityEntry)],
+        ['query'],
+      ),
     'getTasksByAssignee' : IDL.Func([IDL.Text], [IDL.Vec(Task)], ['query']),
     'getTeamMembers' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
+    'getUserByEmail' : IDL.Func([IDL.Text], [IDL.Opt(User)], ['query']),
+    'getUserProfile' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(UserProfile)],
+        ['query'],
+      ),
+    'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'loginUser' : IDL.Func([IDL.Text, IDL.Text], [User], []),
+    'registerUser' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [User], []),
     'removeTeamMember' : IDL.Func([IDL.Text], [], []),
+    'requestPasswordReset' : IDL.Func([IDL.Text], [IDL.Text], []),
+    'resetPassword' : IDL.Func([IDL.Text, IDL.Text], [], []),
+    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'updateTaskStatus' : IDL.Func([IDL.Nat, Status], [], []),
   });
 };
