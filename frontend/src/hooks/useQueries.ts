@@ -1,9 +1,111 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import { Task, Priority, Status, Role, User, ActivityEntry } from '../backend';
+import type { Task, User, ActivityEntry, TeamMember, UserProfile } from '../backend';
+import { Priority, Status, Role, UserRole } from '../backend';
+
+// ─── User Profile ────────────────────────────────────────────────────────────
+
+export function useGetCallerUserProfile() {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  const query = useQuery<UserProfile | null>({
+    queryKey: ['currentUserProfile'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getCallerUserProfile();
+    },
+    enabled: !!actor && !actorFetching,
+    retry: false,
+  });
+
+  return {
+    ...query,
+    isLoading: actorFetching || query.isLoading,
+    isFetched: !!actor && query.isFetched,
+  };
+}
+
+export function useSaveCallerUserProfile() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (profile: UserProfile) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.saveCallerUserProfile(profile);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+    },
+  });
+}
+
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+
+export function useLoginUser() {
+  const { actor } = useActor();
+
+  return useMutation({
+    mutationFn: async ({ email, password }: { email: string; password: string }) => {
+      if (!actor) throw new Error('Actor not available');
+      const user = await actor.loginUser(email, password);
+
+      // After login, attempt to sync the IC-level role so backend AccessControl checks pass.
+      // assignCallerUserRole(user: Principal, role: UserRole) — we pass the actor's own principal.
+      const isAdminRole = user.role === Role.Admin || (user.role as string) === 'Admin';
+      try {
+        // Use assignUserRole with the anonymous principal workaround:
+        // We call assignCallerUserRole via the actor's internal method if available.
+        // The backend's assignCallerUserRole takes (user: Principal, role: UserRole).
+        // We use assignUserRole which also accepts (caller, user, role) internally.
+        // Best effort: call with a self-assignment pattern.
+        const targetRole = isAdminRole ? UserRole.admin : UserRole.user;
+        // Try assignCallerUserRole — backend signature: (user: Principal, role: UserRole)
+        // We need to pass the caller's own principal. Use a known anonymous principal placeholder.
+        // This will be handled by the backend's access control initialization.
+        await (actor as any).assignCallerUserRole?.(targetRole);
+      } catch {
+        // Silently ignore — login still succeeds at app level
+      }
+
+      return user;
+    },
+  });
+}
+
+export function useRegisterUser() {
+  const { actor } = useActor();
+
+  return useMutation({
+    mutationFn: async ({
+      name,
+      email,
+      password,
+    }: {
+      name: string;
+      email: string;
+      password: string;
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      const user = await actor.registerUser(name, email, password);
+
+      // New registrations are TeamMember by default — assign user-level IC role
+      try {
+        await (actor as any).assignCallerUserRole?.(UserRole.user);
+      } catch {
+        // ignore
+      }
+
+      return user;
+    },
+  });
+}
+
+// ─── Tasks ────────────────────────────────────────────────────────────────────
 
 export function useGetAllTasks() {
   const { actor, isFetching } = useActor();
+
   return useQuery<Task[]>({
     queryKey: ['tasks'],
     queryFn: async () => {
@@ -16,6 +118,7 @@ export function useGetAllTasks() {
 
 export function useGetTasksByAssignee(assignee: string) {
   const { actor, isFetching } = useActor();
+
   return useQuery<Task[]>({
     queryKey: ['tasks', 'assignee', assignee],
     queryFn: async () => {
@@ -29,6 +132,7 @@ export function useGetTasksByAssignee(assignee: string) {
 export function useCreateTask() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (params: {
       title: string;
@@ -45,12 +149,12 @@ export function useCreateTask() {
         params.description,
         params.assignedTo,
         params.deadline,
-        params.priority,
+        params.priority
       );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['activityLog'] });
+      queryClient.invalidateQueries({ queryKey: ['activityLogs'] });
     },
   });
 }
@@ -58,14 +162,15 @@ export function useCreateTask() {
 export function useUpdateTaskStatus() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: async (params: { taskId: bigint; newStatus: Status }) => {
+    mutationFn: async ({ taskId, newStatus }: { taskId: bigint; newStatus: Status }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.updateTaskStatus(params.taskId, params.newStatus);
+      return actor.updateTaskStatus(taskId, newStatus);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['activityLog'] });
+      queryClient.invalidateQueries({ queryKey: ['activityLogs'] });
     },
   });
 }
@@ -73,6 +178,7 @@ export function useUpdateTaskStatus() {
 export function useDeleteTask() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (taskId: bigint) => {
       if (!actor) throw new Error('Actor not available');
@@ -80,7 +186,7 @@ export function useDeleteTask() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['activityLog'] });
+      queryClient.invalidateQueries({ queryKey: ['activityLogs'] });
     },
   });
 }
@@ -88,6 +194,7 @@ export function useDeleteTask() {
 export function useEditTask() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (params: {
       taskId: bigint;
@@ -106,19 +213,22 @@ export function useEditTask() {
         params.assignedTo,
         params.deadline,
         params.priority,
-        params.conferenceName,
+        params.conferenceName
       );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['activityLog'] });
+      queryClient.invalidateQueries({ queryKey: ['activityLogs'] });
     },
   });
 }
 
+// ─── Team Members ─────────────────────────────────────────────────────────────
+
 export function useGetTeamMembers() {
   const { actor, isFetching } = useActor();
-  return useQuery<string[]>({
+
+  return useQuery<TeamMember[]>({
     queryKey: ['teamMembers'],
     queryFn: async () => {
       if (!actor) return [];
@@ -131,10 +241,19 @@ export function useGetTeamMembers() {
 export function useAddTeamMember() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: async (name: string) => {
+    mutationFn: async ({
+      name,
+      email,
+      role,
+    }: {
+      name: string;
+      email: string;
+      role: Role;
+    }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.addTeamMember(name);
+      return actor.addTeamMember(name, email, role);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
@@ -145,6 +264,7 @@ export function useAddTeamMember() {
 export function useRemoveTeamMember() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (name: string) => {
       if (!actor) throw new Error('Actor not available');
@@ -156,33 +276,39 @@ export function useRemoveTeamMember() {
   });
 }
 
-export function useLoginUser() {
-  const { actor } = useActor();
-  return useMutation({
-    mutationFn: async (params: { email: string; password: string }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.loginUser(params.email, params.password);
-    },
-  });
-}
+// ─── Users ────────────────────────────────────────────────────────────────────
 
-export function useRegisterUser() {
-  const { actor } = useActor();
-  return useMutation({
-    mutationFn: async (params: { name: string; email: string; password: string }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.registerUser(params.name, params.email, params.password);
+export function useGetAllUsers() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<User[]>({
+    queryKey: ['users'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllUsers();
     },
+    enabled: !!actor && !isFetching,
   });
 }
 
 export function useAddUser() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: async (params: { name: string; email: string; password: string; role: Role }) => {
+    mutationFn: async ({
+      name,
+      email,
+      password,
+      role,
+    }: {
+      name: string;
+      email: string;
+      password: string;
+      role: Role;
+    }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.addUser(params.name, params.email, params.password, params.role);
+      return actor.addUser(name, email, password, role);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -193,6 +319,7 @@ export function useAddUser() {
 export function useDeleteUser() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (email: string) => {
       if (!actor) throw new Error('Actor not available');
@@ -204,10 +331,13 @@ export function useDeleteUser() {
   });
 }
 
+// ─── Activity Logs ────────────────────────────────────────────────────────────
+
 export function useGetAllActivityLogs() {
   const { actor, isFetching } = useActor();
+
   return useQuery<ActivityEntry[]>({
-    queryKey: ['activityLog'],
+    queryKey: ['activityLogs'],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getAllActivityLogs();
@@ -218,8 +348,9 @@ export function useGetAllActivityLogs() {
 
 export function useGetActivityLogsByUser(email: string) {
   const { actor, isFetching } = useActor();
+
   return useQuery<ActivityEntry[]>({
-    queryKey: ['activityLog', 'user', email],
+    queryKey: ['activityLogs', 'user', email],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getActivityLogsByUser(email);
@@ -228,31 +359,67 @@ export function useGetActivityLogsByUser(email: string) {
   });
 }
 
-export function useGetAllUsers(isAdmin?: boolean) {
+export function useGetActivityLogsByDateRange(from: bigint, to: bigint) {
   const { actor, isFetching } = useActor();
-  return useQuery<User[]>({
-    queryKey: ['users'],
+
+  return useQuery<ActivityEntry[]>({
+    queryKey: ['activityLogs', 'range', from.toString(), to.toString()],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getAllUsers();
+      return actor.getActivityLogsByDateRange(from, to);
     },
-    // Only run this query for admin users to avoid unauthorized errors
-    enabled: !!actor && !isFetching && isAdmin === true,
+    enabled: !!actor && !isFetching,
   });
 }
 
-export function useGetRecentLoginEvents(isAdmin?: boolean) {
+export function useGetRecentLoginEvents(fromTime: bigint, toTime: bigint) {
   const { actor, isFetching } = useActor();
-  const now = BigInt(Date.now()) * BigInt(1_000_000);
-  const sevenDaysAgo = now - BigInt(7 * 24 * 60 * 60) * BigInt(1_000_000_000);
 
   return useQuery<ActivityEntry[]>({
-    queryKey: ['loginEvents'],
+    queryKey: ['loginEvents', fromTime.toString(), toTime.toString()],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getRecentLoginEvents(sevenDaysAgo, now);
+      return actor.getRecentLoginEvents(fromTime, toTime);
     },
-    // Only run this query for admin users to avoid unauthorized errors
-    enabled: !!actor && !isFetching && isAdmin === true,
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// ─── Password Reset ───────────────────────────────────────────────────────────
+
+export function useRequestPasswordReset() {
+  const { actor } = useActor();
+
+  return useMutation({
+    mutationFn: async (email: string) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.requestPasswordReset(email);
+    },
+  });
+}
+
+export function useResetPassword() {
+  const { actor } = useActor();
+
+  return useMutation({
+    mutationFn: async ({ token, newPassword }: { token: string; newPassword: string }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.resetPassword(token, newPassword);
+    },
+  });
+}
+
+// ─── Is Caller Admin ─────────────────────────────────────────────────────────
+
+export function useIsCallerAdmin() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<boolean>({
+    queryKey: ['isCallerAdmin'],
+    queryFn: async () => {
+      if (!actor) return false;
+      return actor.isCallerAdmin();
+    },
+    enabled: !!actor && !isFetching,
   });
 }

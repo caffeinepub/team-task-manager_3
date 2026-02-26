@@ -21,6 +21,10 @@ function formatTimestamp(ts: bigint): string {
   return date.toLocaleDateString();
 }
 
+// Show login events from the last 24 hours
+const now = BigInt(Date.now()) * 1_000_000n;
+const oneDayAgo = now - BigInt(24 * 60 * 60 * 1_000_000_000);
+
 export default function NotificationBell() {
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -28,7 +32,11 @@ export default function NotificationBell() {
 
   // useTaskReminders fetches tasks internally — no argument needed
   const reminders = useTaskReminders();
-  const { data: loginEvents = [] } = useGetRecentLoginEvents();
+
+  // Fetch login events from the last 24 hours; only meaningful for admins
+  const fromTime = BigInt(Date.now() - 24 * 60 * 60 * 1000) * 1_000_000n;
+  const toTime = BigInt(Date.now()) * 1_000_000n;
+  const { data: loginEvents = [] } = useGetRecentLoginEvents(fromTime, toTime);
 
   const sortedLoginEvents = [...loginEvents]
     .filter(e => e.actionType === Variant_Login_StatusChanged_TaskEdited_TaskCreated_TaskDeleted.Login)

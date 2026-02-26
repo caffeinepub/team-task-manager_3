@@ -1,53 +1,54 @@
 {
   "kind": "build_request",
-  "title": "Fix missing Add Team Member option in UI",
-  "priority": "high",
+  "title": "Fix Add Team Member modal — remove permission error and enable saving",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Ensure the 'Add Team Member' button is visible and functional on the Team Members page (frontend/src/pages/TeamMembers.tsx). The button should open the AddUserModal (frontend/src/components/AddUserModal.tsx) when clicked. Verify the button is rendered in the page header or toolbar area and is not hidden due to a missing condition, incorrect auth guard, or rendering bug.",
-      "target": "frontend",
+      "text": "Remove the permission check that blocks non-admin users from adding team members in the backend. The `addTeamMember` function should allow any authenticated caller to add a team member without role-based restriction.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-recent"
         ],
         "quotes": [
-          "Add Team Member option is not showing"
+          "Remove the permission error — fix the logic so logged-in users can add team members without hitting this restriction"
         ]
       },
       "acceptanceCriteria": [
-        "An 'Add Team Member' button is visible on the Team Members page when logged in as an admin",
-        "Clicking the button opens the AddUserModal dialog",
-        "The modal allows submitting a new user and the new member appears in the list after creation",
-        "The button does not appear for non-admin users if role-based visibility is intended"
+        "Calling `addTeamMember` no longer returns a permission error for any authenticated user",
+        "Team members are successfully saved to the backend state"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Audit the AdminDashboard page (frontend/src/pages/AdminDashboard.tsx) team members tab to ensure the 'Add Team Member' action is also accessible from there if it was previously present. Fix any missing button, broken import, or incorrect conditional rendering that prevents it from showing.",
+      "text": "Update the `AddUserModal` component to remove any frontend-side permission guard or error display (the 'You do not have permission to add team members' message). The modal should show only the clean form with Name, Email ID, and Role fields, plus Cancel and Add Member buttons.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-recent"
         ],
         "quotes": [
-          "Add Team Member option is not showing"
+          "Remove the permission error",
+          "Keep the form simple — Name, Email ID, and Role fields"
         ]
       },
       "acceptanceCriteria": [
-        "The 'Add Team Member' option is visible in the team members tab of the Admin Dashboard",
-        "The option correctly invokes the AddUserModal"
+        "No permission error banner appears in the Add Team Member modal",
+        "Modal displays Name, Email ID, and Role fields only",
+        "Cancel and Add Member buttons are present and functional",
+        "Submitting the form calls the backend and saves the new team member"
       ]
     }
   ],
   "constraints": [
-    "Do not modify files in frontend/src/hooks/useActor.ts, frontend/src/hooks/useInternetIdentity.ts, frontend/src/main.tsx, or frontend/src/components/ui",
-    "Do not change the backend schema or actor interface"
+    "Do not change the form fields — Name, Email ID, and Role must remain as-is",
+    "Do not modify any files in frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui"
   ],
   "nonGoals": [
-    "Adding new backend endpoints or changing existing ones",
-    "Redesigning the Team Members page layout",
-    "Changing user role or permission logic"
+    "Redesigning the modal UI beyond removing the permission error",
+    "Adding new form fields or validation rules",
+    "Changing role options in the dropdown"
   ],
   "imageRequirements": {
     "required": [],

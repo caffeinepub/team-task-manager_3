@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -13,11 +12,10 @@ import TaskFilters from '../components/TaskFilters';
 import CreateTaskModal from '../components/CreateTaskModal';
 import EditTaskModal from '../components/EditTaskModal';
 import ReportExportButtons from '../components/ReportExportButtons';
-import type { Task } from '../backend';
+import type { Task, TeamMember } from '../backend';
 
 export default function Tasks() {
-  const navigate = useNavigate();
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   const { data: tasks = [], isLoading } = useGetAllTasks();
   const { data: teamMembers = [] } = useGetTeamMembers();
   const deleteTask = useDeleteTask();
@@ -26,14 +24,11 @@ export default function Tasks() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-  // All hooks must be called before any early return
   const sortedTasks = sortTasksByDeadlineAndPriority(tasks);
   const filteredTasks = useTaskFilters(sortedTasks, filters);
 
-  if (!isAuthenticated) {
-    navigate({ to: '/login' });
-    return null;
-  }
+  // Extract member names for components that expect string[]
+  const memberNames = teamMembers.map((m: TeamMember) => m.name);
 
   const handleDelete = async (taskId: bigint) => {
     try {
@@ -71,7 +66,7 @@ export default function Tasks() {
       {/* Filters */}
       <TaskFilters
         filters={filters}
-        teamMembers={teamMembers}
+        teamMembers={memberNames}
         onChange={setFilters}
       />
 
@@ -92,13 +87,13 @@ export default function Tasks() {
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredTasks.map(task => (
             <TaskCard
               key={task.id.toString()}
               task={task}
+              onEdit={isAdmin ? () => setEditingTask(task) : undefined}
               onDelete={isAdmin ? handleDelete : undefined}
-              onEdit={setEditingTask}
             />
           ))}
         </div>
@@ -107,7 +102,7 @@ export default function Tasks() {
       <CreateTaskModal
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
-        teamMembers={teamMembers}
+        teamMembers={memberNames}
       />
 
       {editingTask && (

@@ -1,14 +1,9 @@
 import React from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
-import { LayoutDashboard, CheckSquare, Activity, Users, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, Activity, Users, Menu, X } from 'lucide-react';
 import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useQueryClient } from '@tanstack/react-query';
 import NotificationBell from './NotificationBell';
 import ThemeSwitcher from './ThemeSwitcher';
-import { Button } from '@/components/ui/button';
-import { Role } from '../backend';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -22,23 +17,9 @@ const navItems = [
 ];
 
 export default function Layout({ children }: LayoutProps) {
-  const { currentUser, logout, isAuthenticated } = useAuth();
-  const { clear } = useInternetIdentity();
-  const queryClient = useQueryClient();
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const handleLogout = async () => {
-    logout();
-    queryClient.clear();
-    await clear();
-    window.location.href = '/login';
-  };
-
-  const initials = currentUser?.name
-    ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-    : '?';
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -106,31 +87,18 @@ export default function Layout({ children }: LayoutProps) {
           })}
         </nav>
 
-        {/* User info + logout */}
-        {isAuthenticated && currentUser && (
-          <div className="p-4 border-t border-sidebar-border">
-            <div className="flex items-center gap-3 mb-3 p-3 rounded-xl bg-sidebar-accent/50">
-              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold shrink-0">
-                {initials}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-sidebar-foreground truncate">{currentUser.name}</p>
-                <p className="text-xs text-sidebar-foreground/50 truncate">
-                  {currentUser.role === Role.Admin ? '⚡ Admin' : '👤 Team Member'}
-                </p>
-              </div>
+        {/* User info card (no logout) */}
+        <div className="p-4 border-t border-sidebar-border">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-sidebar-accent/50">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold shrink-0">
+              AD
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full gap-2 text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-xl"
-              onClick={handleLogout}
-            >
-              <LogOut size={14} />
-              Log Out
-            </Button>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-sidebar-foreground truncate">Admin</p>
+              <p className="text-xs text-sidebar-foreground/50 truncate">⚡ Administrator</p>
+            </div>
           </div>
-        )}
+        </div>
       </aside>
 
       {/* Main content */}

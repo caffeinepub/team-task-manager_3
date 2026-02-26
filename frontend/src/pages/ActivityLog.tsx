@@ -1,12 +1,10 @@
 import { useState, useMemo } from 'react';
-import { useNavigate } from '@tanstack/react-router';
 import { Activity, Filter, User, Calendar, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useGetAllActivityLogs } from '../hooks/useQueries';
-import { useAuth } from '../contexts/AuthContext';
 import { Variant_Login_StatusChanged_TaskEdited_TaskCreated_TaskDeleted } from '../backend';
 import type { ActivityEntry } from '../backend';
 
@@ -67,8 +65,6 @@ function dotColor(actionType: Variant_Login_StatusChanged_TaskEdited_TaskCreated
 }
 
 export default function ActivityLog() {
-  const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
   const { data: logs = [], isLoading } = useGetAllActivityLogs();
 
   const [actorFilter, setActorFilter] = useState('');
@@ -76,7 +72,7 @@ export default function ActivityLog() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
-  // Sort descending by timestamp — hooks must be called before any early return
+  // Sort descending by timestamp
   const sortedLogs = useMemo(() =>
     [...logs].sort((a, b) => Number(b.timestamp - a.timestamp)),
     [logs]
@@ -106,12 +102,6 @@ export default function ActivityLog() {
       return true;
     });
   }, [sortedLogs, actorFilter, taskFilter, dateFrom, dateTo]);
-
-  // Auth guard after all hooks
-  if (!isAuthenticated) {
-    navigate({ to: '/login' });
-    return null;
-  }
 
   const clearFilters = () => {
     setActorFilter('');

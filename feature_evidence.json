@@ -2,29 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-ensure-the-add-team-member-button-is-visible-and-functional-on-the-team-members-page-frontend-src-pages-teammembers-tsx-the-button-should-open-the-addusermodal-frontend-src-components-addusermodal-tsx-when-clicked-verify-the-button-is-rendered-in-the-page-header-or-toolbar-area-and-is-not-hidden-due-to-a-missing-condition-incorrect-auth-guard-or-rendering-bug",
-      "featureTitle": "Ensure the 'Add Team Member' button is visible and functional on the Team Members page (frontend/src/pages/TeamMembers.tsx). The button should open the AddUserModal (frontend/src/components/AddUserModal.tsx) when clicked. Verify the button is rendered in the page header or toolbar area and is not hidden due to a missing condition, incorrect auth guard, or rendering bug.",
+      "featureId": "feature-update-the-addusermodal-component-to-remove-any-frontend-side-permission-guard-or-error-display-the-you-do-not-have-permission-to-add-team-members-message-the-modal-should-show-only-the-clean-form-with-name-email-id-and-role-fields-plus-cancel-and-add-member-buttons",
+      "featureTitle": "Update the `AddUserModal` component to remove any frontend-side permission guard or error display (the 'You do not have permission to add team members' message). The modal should show only the clean form with Name, Email ID, and Role fields, plus Cancel and Add Member buttons.",
       "files": [
-        "frontend/src/pages/TeamMembers.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0"
-      ],
-      "testIds": [
-        "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-audit-the-admindashboard-page-frontend-src-pages-admindashboard-tsx-team-members-tab-to-ensure-the-add-team-member-action-is-also-accessible-from-there-if-it-was-previously-present-fix-any-missing-button-broken-import-or-incorrect-conditional-rendering-that-prevents-it-from-showing",
-      "featureTitle": "Audit the AdminDashboard page (frontend/src/pages/AdminDashboard.tsx) team members tab to ensure the 'Add Team Member' action is also accessible from there if it was previously present. Fix any missing button, broken import, or incorrect conditional rendering that prevents it from showing.",
-      "files": [
-        "frontend/src/pages/AdminDashboard.tsx"
+        "frontend/src/components/AddUserModal.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",

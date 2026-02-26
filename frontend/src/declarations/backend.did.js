@@ -68,10 +68,15 @@ export const UserProfile = IDL.Record({
   'role' : Role,
   'email' : IDL.Text,
 });
+export const TeamMember = IDL.Record({
+  'name' : IDL.Text,
+  'role' : Role,
+  'email' : IDL.Text,
+});
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-  'addTeamMember' : IDL.Func([IDL.Text], [], []),
+  'addTeamMember' : IDL.Func([IDL.Text, IDL.Text, Role], [], []),
   'addUser' : IDL.Func([IDL.Text, IDL.Text, IDL.Text, Role], [User], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'assignUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
@@ -128,7 +133,7 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'getTasksByAssignee' : IDL.Func([IDL.Text], [IDL.Vec(Task)], ['query']),
-  'getTeamMembers' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
+  'getTeamMembers' : IDL.Func([], [IDL.Vec(TeamMember)], ['query']),
   'getUserByEmail' : IDL.Func([IDL.Text], [IDL.Opt(User)], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
@@ -205,10 +210,15 @@ export const idlFactory = ({ IDL }) => {
     'role' : Role,
     'email' : IDL.Text,
   });
+  const TeamMember = IDL.Record({
+    'name' : IDL.Text,
+    'role' : Role,
+    'email' : IDL.Text,
+  });
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-    'addTeamMember' : IDL.Func([IDL.Text], [], []),
+    'addTeamMember' : IDL.Func([IDL.Text, IDL.Text, Role], [], []),
     'addUser' : IDL.Func([IDL.Text, IDL.Text, IDL.Text, Role], [User], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'assignUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
@@ -265,7 +275,7 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'getTasksByAssignee' : IDL.Func([IDL.Text], [IDL.Vec(Task)], ['query']),
-    'getTeamMembers' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
+    'getTeamMembers' : IDL.Func([], [IDL.Vec(TeamMember)], ['query']),
     'getUserByEmail' : IDL.Func([IDL.Text], [IDL.Opt(User)], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],

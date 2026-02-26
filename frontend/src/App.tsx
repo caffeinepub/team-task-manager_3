@@ -5,9 +5,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import Layout from './components/Layout';
 import AdminDashboard from './pages/AdminDashboard';
 import TeamMemberView from './pages/TeamMemberView';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import ForgotPassword from './pages/ForgotPassword';
 import Tasks from './pages/Tasks';
 import ActivityLog from './pages/ActivityLog';
 import TeamMembers from './pages/TeamMembers';
@@ -25,71 +22,45 @@ const rootRoute = createRootRoute({
   component: () => <Outlet />,
 });
 
-// Auth layout (no sidebar)
-const authLayoutRoute = createRoute({
+// Main layout (with sidebar) — always accessible, no auth gate
+const mainLayoutRoute = createRoute({
   getParentRoute: () => rootRoute,
-  id: 'auth-layout',
-  component: () => <Outlet />,
-});
-
-// Protected layout (with sidebar)
-const protectedLayoutRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  id: 'protected-layout',
+  id: 'main-layout',
   component: () => <Layout><Outlet /></Layout>,
 });
 
-const loginRoute = createRoute({
-  getParentRoute: () => authLayoutRoute,
-  path: '/login',
-  component: Login,
-});
-
-const signupRoute = createRoute({
-  getParentRoute: () => authLayoutRoute,
-  path: '/signup',
-  component: Signup,
-});
-
-const forgotPasswordRoute = createRoute({
-  getParentRoute: () => authLayoutRoute,
-  path: '/forgot-password',
-  component: ForgotPassword,
-});
-
 const dashboardRoute = createRoute({
-  getParentRoute: () => protectedLayoutRoute,
+  getParentRoute: () => mainLayoutRoute,
   path: '/',
   component: AdminDashboard,
 });
 
 const tasksRoute = createRoute({
-  getParentRoute: () => protectedLayoutRoute,
+  getParentRoute: () => mainLayoutRoute,
   path: '/tasks',
   component: Tasks,
 });
 
 const activityLogRoute = createRoute({
-  getParentRoute: () => protectedLayoutRoute,
+  getParentRoute: () => mainLayoutRoute,
   path: '/activity-log',
   component: ActivityLog,
 });
 
 const teamMembersRoute = createRoute({
-  getParentRoute: () => protectedLayoutRoute,
+  getParentRoute: () => mainLayoutRoute,
   path: '/team-members',
   component: TeamMembers,
 });
 
 const myTasksRoute = createRoute({
-  getParentRoute: () => protectedLayoutRoute,
+  getParentRoute: () => mainLayoutRoute,
   path: '/my-tasks',
   component: TeamMemberView,
 });
 
 const routeTree = rootRoute.addChildren([
-  authLayoutRoute.addChildren([loginRoute, signupRoute, forgotPasswordRoute]),
-  protectedLayoutRoute.addChildren([
+  mainLayoutRoute.addChildren([
     dashboardRoute,
     tasksRoute,
     activityLogRoute,

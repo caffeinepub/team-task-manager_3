@@ -7,10 +7,7 @@ import Time "mo:core/Time";
 import Int "mo:core/Int";
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
-
-import Nat "mo:core/Nat";
 import Iter "mo:core/Iter";
-
 
 actor {
   type Priority = {
@@ -75,6 +72,12 @@ actor {
     role : Role;
   };
 
+  type TeamMember = {
+    name : Text;
+    email : Text;
+    role : Role;
+  };
+
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
@@ -82,7 +85,7 @@ actor {
   var nextUserId : Nat = 1;
   var nextActivityId : Nat = 1;
 
-  let teamMembers = Map.empty<Nat, Text>();
+  let teamMembers = Map.empty<Nat, TeamMember>();
   var nextTeamMemberId : Nat = 1;
 
   let tasks = Map.empty<Nat, Task>();
@@ -402,17 +405,18 @@ actor {
     );
   };
 
-  // addTeamMember is admin-only
-  public shared ({ caller }) func addTeamMember(name : Text) : async () {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admins can add team members");
+  // addTeamMember requires authenticated user (any authenticated caller may add a team member)
+  public shared ({ caller }) func addTeamMember(name : Text, email : Text, role : Role) : async () {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only authenticated users can add team members");
     };
     for ((_, member) in teamMembers.entries()) {
-      if (Text.equal(member, name)) {
+      if (Text.equal(member.name, name)) {
         Runtime.trap("Team member already exists");
       };
     };
-    teamMembers.add(nextTeamMemberId, name);
+    let newMember : TeamMember = { name; email; role };
+    teamMembers.add(nextTeamMemberId, newMember);
     nextTeamMemberId += 1;
   };
 
@@ -423,7 +427,7 @@ actor {
     };
     var foundKey : ?Nat = null;
     for ((key, member) in teamMembers.entries()) {
-      if (Text.equal(member, name)) {
+      if (Text.equal(member.name, name)) {
         foundKey := ?key;
       };
     };
@@ -434,7 +438,7 @@ actor {
   };
 
   // getTeamMembers requires authenticated user
-  public query ({ caller }) func getTeamMembers() : async [Text] {
+  public query ({ caller }) func getTeamMembers() : async [TeamMember] {
     if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Only authenticated users can view team members");
     };

@@ -1,32 +1,34 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
-  "architectural_notes": [],
-  "known_issues": [
-    "'Add Team Member' button/option is not showing up in the UI"
+  "summary": "App with team member management functionality. Fixing 'Add Team Member' modal to remove permission errors and allow any logged-in user to add team members, while keeping the form simple (Name, Email ID, Role fields).",
+  "architectural_notes": [
+    "Backend canister (nkwgw-dqaaa-aaaad-qiqha-cai) on Internet Computer - can enter stopped state after deployment, requiring redeploy to restart"
   ],
+  "known_issues": [],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-ensure-the-add-team-member-button-is-visible-and-functional-on-the-team-members-page-frontend-src-pages-teammembers-tsx-the-button-should-open-the-addusermodal-frontend-src-components-addusermodal-tsx-when-clicked-verify-the-button-is-rendered-in-the-page-header-or-toolbar-area-and-is-not-hidden-due-to-a-missing-condition-incorrect-auth-guard-or-rendering-bug",
-      "title": "Ensure the 'Add Team Member' button is visible and functional on the Team Members page (frontend/src/pages/TeamMembers.tsx). The button should open the AddUserModal (frontend/src/components/AddUserModal.tsx) when clicked. Verify the button is rendered in the page header or toolbar area and is not hidden due to a missing condition, incorrect auth guard, or rendering bug.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-audit-the-admindashboard-page-frontend-src-pages-admindashboard-tsx-team-members-tab-to-ensure-the-add-team-member-action-is-also-accessible-from-there-if-it-was-previously-present-fix-any-missing-button-broken-import-or-incorrect-conditional-rendering-that-prevents-it-from-showing",
-      "title": "Audit the AdminDashboard page (frontend/src/pages/AdminDashboard.tsx) team members tab to ensure the 'Add Team Member' action is also accessible from there if it was previously present. Fix any missing button, broken import, or incorrect conditional rendering that prevents it from showing.",
+      "id": "feature-update-the-addusermodal-component-to-remove-any-frontend-side-permission-guard-or-error-display-the-you-do-not-have-permission-to-add-team-members-message-the-modal-should-show-only-the-clean-form-with-name-email-id-and-role-fields-plus-cancel-and-add-member-buttons",
+      "title": "Update the `AddUserModal` component to remove any frontend-side permission guard or error display (the 'You do not have permission to add team members' message). The modal should show only the clean form with Name, Email ID, and Role fields, plus Cancel and Add Member buttons.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     }
   ],
-  "new_feature_requests": [],
-  "projectName": "Fix missing Add Team Member option in UI",
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Remove the permission check that blocks non-admin users from adding team members in the backend. The `addTeamMember` function should allow any authenticated caller to add a team member without role-based restriction.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Fix Add Team Member modal — remove permission error and enable saving",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -1,37 +1,22 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix missing Add Team Member option in UI",
+  "title": "Fix Add Team Member modal — remove permission error and enable saving",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Ensure the 'Add Team Member' button is visible and functional on the Team Members page",
-      "acceptanceCriteria": [
-        "An 'Add Team Member' button is visible on the Team Members page when logged in as an admin",
-        "Clicking the button opens the AddUserModal dialog",
-        "The modal allows submitting a new user and the new member appears in the list after creation",
-        "The button does not appear for non-admin users if role-based visibility is intended"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/TeamMembers.tsx",
-          "operation": "modify",
-          "description": "Review the component to ensure the 'Add Team Member' button is rendered in the page header or toolbar. Check for any missing conditional logic, incorrect auth guards, or rendering bugs that prevent the button from displaying. Ensure the button has an onClick handler that opens the AddUserModal component. If the button is missing entirely, add it to the UI with proper styling consistent with other action buttons in the app. Verify the AddUserModal is properly imported and its state management (open/close) is correctly wired."
-        }
-      ]
-    },
-    {
       "id": "REQ-2",
-      "summary": "Audit the AdminDashboard team members tab to ensure 'Add Team Member' action is accessible",
+      "summary": "Remove the permission error banner and frontend-side permission guard from the AddUserModal component to enable authenticated users to add team members",
       "acceptanceCriteria": [
-        "The 'Add Team Member' option is visible in the team members tab of the Admin Dashboard",
-        "The option correctly invokes the AddUserModal"
+        "No permission error banner appears in the Add Team Member modal",
+        "Modal displays Name, Email ID, and Role fields only",
+        "Cancel and Add Member buttons are present and functional",
+        "Submitting the form calls the backend and saves the new team member"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/AdminDashboard.tsx",
+          "path": "frontend/src/components/AddUserModal.tsx",
           "operation": "modify",
-          "description": "Review the team members tab section of the AdminDashboard to check if an 'Add Team Member' button or action trigger exists. If missing, add the button with appropriate positioning and styling. Ensure the AddUserModal component is imported if not already present. Wire the button's onClick to open the AddUserModal. Verify that the button respects any existing conditional rendering or role-based visibility logic. Check for broken imports or incorrect component references that may have hidden the button."
+          "description": "Remove any permission check logic or error state that displays 'You do not have permission to add team members'. Ensure the modal renders only the clean form with Name, Email ID, and Role fields, plus Cancel and Add Member buttons. The submit handler should call the addTeamMember mutation without any frontend-side authorization guard. Verify that the form remains functional and calls the backend to save the new team member on submission."
         }
       ]
     }

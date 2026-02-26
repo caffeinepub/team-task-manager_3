@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useEditTask, useGetTeamMembers } from '../hooks/useQueries';
-import { Priority, type Task } from '../backend';
+import { Priority, type Task, type TeamMember } from '../backend';
 
 interface EditTaskModalProps {
   task: Task;
@@ -139,9 +139,9 @@ export default function EditTaskModal({ task, open, onOpenChange }: EditTaskModa
                 <SelectValue placeholder="Select team member" />
               </SelectTrigger>
               <SelectContent>
-                {teamMembers.map(member => (
-                  <SelectItem key={member} value={member}>
-                    {member}
+                {teamMembers.map((member: TeamMember) => (
+                  <SelectItem key={member.name} value={member.name}>
+                    {member.name}
                   </SelectItem>
                 ))}
               </SelectContent>

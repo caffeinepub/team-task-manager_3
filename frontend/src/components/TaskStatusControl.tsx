@@ -10,11 +10,11 @@ interface TaskStatusControlProps {
   currentStatus: Status;
 }
 
-const STATUS_CONFIG = {
+const STATUS_CONFIG: Record<Status, { label: string; classes: string }> = {
   [Status.Pending]: { label: 'Pending', classes: 'text-muted-foreground' },
   [Status.InProgress]: { label: 'In Progress', classes: 'text-blue-400' },
   [Status.Completed]: { label: 'Completed', classes: 'text-green-400' },
-  [Status.CarryForward]: { label: 'Carry Forward', classes: 'text-carry-forward' },
+  [Status.CarryForward]: { label: 'Carry Forward', classes: 'text-purple-400' },
 };
 
 export default function TaskStatusControl({ taskId, currentStatus }: TaskStatusControlProps) {
@@ -64,7 +64,7 @@ export default function TaskStatusControl({ taskId, currentStatus }: TaskStatusC
           </SelectItem>
           <SelectItem value={Status.CarryForward} className="text-xs">
             <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-carry-forward inline-block" />
+              <span className="h-1.5 w-1.5 rounded-full bg-purple-400 inline-block" />
               Carry Forward
             </span>
           </SelectItem>

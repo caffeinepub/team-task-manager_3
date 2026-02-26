@@ -15,6 +15,11 @@ export interface User {
     email: string;
     passwordHash: string;
 }
+export interface TeamMember {
+    name: string;
+    role: Role;
+    email: string;
+}
 export interface Task {
     id: bigint;
     status: Status;
@@ -69,7 +74,7 @@ export enum Variant_Login_StatusChanged_TaskEdited_TaskCreated_TaskDeleted {
     TaskDeleted = "TaskDeleted"
 }
 export interface backendInterface {
-    addTeamMember(name: string): Promise<void>;
+    addTeamMember(name: string, email: string, role: Role): Promise<void>;
     addUser(name: string, email: string, password: string, role: Role): Promise<User>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     assignUserRole(user: Principal, role: UserRole): Promise<void>;
@@ -87,7 +92,7 @@ export interface backendInterface {
     getCallerUserRole(): Promise<UserRole>;
     getRecentLoginEvents(fromTime: bigint, toTime: bigint): Promise<Array<ActivityEntry>>;
     getTasksByAssignee(assignee: string): Promise<Array<Task>>;
-    getTeamMembers(): Promise<Array<string>>;
+    getTeamMembers(): Promise<Array<TeamMember>>;
     getUserByEmail(email: string): Promise<User | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;

@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the missing "Add Team Member" button so it is visible and functional for admin users on both the Team Members page and the Admin Dashboard.
+**Goal:** Fix the "Add Team Member" modal by removing the permission error that blocks users from adding team members, and ensure the form saves successfully.
 
 **Planned changes:**
-- Restore the "Add Team Member" button in the Team Members page header/toolbar so it is visible to admin users and opens the AddUserModal when clicked
-- Audit and fix the Admin Dashboard team members tab to ensure the "Add Team Member" action is also present and correctly invokes the AddUserModal
-- Resolve any missing conditions, broken imports, or incorrect conditional rendering that caused the button to be hidden
+- Remove the role-based permission check in the `addTeamMember` backend function so any authenticated user can add team members
+- Remove the "You do not have permission to add team members" error banner from the `AddUserModal` frontend component
+- Ensure submitting the form correctly calls the backend and saves the new team member
 
-**User-visible outcome:** Admin users can see and click the "Add Team Member" button on both the Team Members page and the Admin Dashboard team members tab, open the modal, and successfully add new team members.
+**User-visible outcome:** Users can open the Add Team Member modal, fill in Name, Email ID, and Role fields, and successfully save a new team member without seeing any permission error.

@@ -1,48 +1,42 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T06:42:20.019Z",
+  "generatedAt": "2026-02-26T08:49:39.111Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 2,
-    "implemented": 2,
+    "implemented": 1,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Ensure the 'Add Team Member' button is visible and functional on the Team Members page (frontend/src/pages/TeamMembers.tsx). The button should open the AddUserModal (frontend/src/components/AddUserModal.tsx) when clicked. Verify the button is rendered in the page header or toolbar area and is not hidden due to a missing condition, incorrect auth guard, or rendering bug.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/TeamMembers.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/TeamMembers.tsx"
-        ]
+        "summary": "Remove the permission check that blocks non-admin users from adding team members in the backend. The `addTeamMember` function should allow any authenticated caller to add a team member without role-based restriction.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
         "id": "REQ-2",
-        "summary": "Audit the AdminDashboard page (frontend/src/pages/AdminDashboard.tsx) team members tab to ensure the 'Add Team Member' action is also accessible from there if it was previously present. Fix any missing button, broken import, or incorrect conditional rendering that prevents it from showing.",
+        "summary": "Update the `AddUserModal` component to remove any frontend-side permission guard or error display (the 'You do not have permission to add team members' message). The modal should show only the clean form with Name, Email ID, and Role fields, plus Cancel and Add Member buttons.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/AdminDashboard.tsx"
+          "frontend/src/components/AddUserModal.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/AdminDashboard.tsx"
+          "frontend/src/components/AddUserModal.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/contexts/AuthContext.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/AdminDashboard.tsx",
-    "frontend/src/pages/TeamMembers.tsx",
+    "frontend/src/components/AddUserModal.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

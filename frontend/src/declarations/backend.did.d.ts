@@ -44,6 +44,7 @@ export interface Task {
   'deadline' : bigint,
   'priority' : Priority,
 }
+export interface TeamMember { 'name' : string, 'role' : Role, 'email' : string }
 export interface User {
   'id' : bigint,
   'name' : string,
@@ -62,7 +63,7 @@ export type UserRole = { 'admin' : null } |
   { 'guest' : null };
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
-  'addTeamMember' : ActorMethod<[string], undefined>,
+  'addTeamMember' : ActorMethod<[string, string, Role], undefined>,
   'addUser' : ActorMethod<[string, string, string, Role], User>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'assignUserRole' : ActorMethod<[Principal, UserRole], undefined>,
@@ -89,7 +90,7 @@ export interface _SERVICE {
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getRecentLoginEvents' : ActorMethod<[bigint, bigint], Array<ActivityEntry>>,
   'getTasksByAssignee' : ActorMethod<[string], Array<Task>>,
-  'getTeamMembers' : ActorMethod<[], Array<string>>,
+  'getTeamMembers' : ActorMethod<[], Array<TeamMember>>,
   'getUserByEmail' : ActorMethod<[string], [] | [User]>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
