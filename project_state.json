@@ -1,25 +1,25 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Project management Kanban board app with task cards, status badges, column-based workflow (To Do/In Progress/Done), date filters, export functionality, and reminders panel.",
-  "architectural_notes": [],
-  "known_issues": [
-    "Reminders dropdown overlaps date filter buttons and Export button in top-right area",
-    "Color contrast issues: low contrast between text and background on cards, badges, and column headers (especially Done column with dark green bg)"
+  "summary": "Project management dashboard (TaskFlow) with light/dark mode support. Light mode has invisible text issue being fixed. Dark mode color scheme being updated to teal.",
+  "architectural_notes": [
+    "Light/dark mode toggle with theme support",
+    "Dark mode uses teal color scheme; light mode uses dark text on light backgrounds"
   ],
+  "known_issues": [],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-reposition-the-reminders-dropdown-panel-so-it-does-not-overlap-the-export-button-or-the-date-filter-buttons-this-week-this-month-custom-the-panel-should-open-below-the-notification-bell-icon-without-covering-any-toolbar-elements-ensuring-proper-z-index-layering-and-positioning-so-all-toolbar-controls-remain-fully-visible-and-accessible-when-the-reminders-panel-is-open",
-      "title": "Reposition the Reminders dropdown panel so it does not overlap the Export button or the date filter buttons (This Week, This Month, Custom). The panel should open below the notification bell icon without covering any toolbar elements, ensuring proper z-index layering and positioning so all toolbar controls remain fully visible and accessible when the Reminders panel is open.",
+      "id": "feature-fix-light-mode-text-visibility-ensure-all-text-across-every-page-and-component-headings-body-text-labels-stat-values-sidebar-links-card-text-etc-uses-dark-near-black-colors-e-g-111827-or-equivalent-dark-gray-so-they-are-clearly-visible-on-white-light-backgrounds-no-light-colored-or-white-text-should-appear-on-light-backgrounds-in-light-mode",
+      "title": "Fix light mode text visibility: ensure all text across every page and component (headings, body text, labels, stat values, sidebar links, card text, etc.) uses dark near-black colors (e.g., #111827 or equivalent dark gray) so they are clearly visible on white/light backgrounds. No light-colored or white text should appear on light backgrounds in light mode.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-fix-color-contrast-issues-across-the-entire-application-specifically-1-the-done-column-header-currently-has-a-very-dark-green-background-ensure-the-header-text-and-icon-are-clearly-readable-against-it-2-task-cards-in-all-columns-must-have-sufficient-contrast-between-card-background-and-body-text-assignee-names-and-date-text-3-status-badge-text-to-do-in-progress-done-must-contrast-clearly-against-their-badge-background-colors-4-column-header-badges-task-count-circles-must-have-readable-text-on-their-background-5-all-body-text-throughout-the-app-must-meet-a-minimum-contrast-ratio-of-4-5-1-against-its-background-avoid-pairing-similarly-dark-or-similarly-light-colors-for-text-and-background",
-      "title": "Fix color contrast issues across the entire application. Specifically: (1) The 'Done' column header currently has a very dark green background — ensure the header text and icon are clearly readable against it. (2) Task cards in all columns must have sufficient contrast between card background and body text, assignee names, and date text. (3) Status badge text (To Do, In Progress, Done) must contrast clearly against their badge background colors. (4) Column header badges (task count circles) must have readable text on their background. (5) All body text throughout the app must meet a minimum contrast ratio of 4.5:1 against its background. Avoid pairing similarly dark or similarly light colors for text and background.",
+      "id": "feature-update-the-dark-mode-color-scheme-to-use-teal-as-the-primary-accent-color-throughout-the-entire-application-replace-existing-purple-violet-orange-accent-colors-in-dark-mode-with-teal-shades-e-g-teal-400-2dd4bf-teal-500-14b8a6-teal-600-0d9488-this-includes-active-sidebar-item-highlight-buttons-new-task-primary-actions-badges-progress-bars-icons-chart-accent-colors-active-nav-indicators-and-any-other-accent-colored-elements-the-dark-background-near-black-should-remain-only-the-accent-highlight-colors-change-to-teal",
+      "title": "Update the dark mode color scheme to use teal as the primary accent color throughout the entire application. Replace existing purple/violet/orange accent colors in dark mode with teal shades (e.g., teal-400 #2dd4bf, teal-500 #14b8a6, teal-600 #0d9488). This includes: active sidebar item highlight, buttons (New Task, primary actions), badges, progress bars, icons, chart accent colors, active nav indicators, and any other accent-colored elements. The dark background (near-black) should remain, only the accent/highlight colors change to teal.",
       "reqIds": [
         "REQ-2"
       ],
@@ -28,7 +28,7 @@
   ],
   "new_feature_requests": [],
   "gameProjectType": "none",
-  "projectName": "Fix Reminders panel overlap and color contrast issues",
+  "projectName": "TaskFlow",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

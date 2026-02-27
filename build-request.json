@@ -1,61 +1,61 @@
 {
   "kind": "build_request",
-  "title": "Fix Reminders panel overlap and color contrast issues",
+  "title": "Fix light mode text visibility and update dark mode to teal color scheme",
+  "projectName": "TaskFlow",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Reposition the Reminders dropdown panel so it does not overlap the Export button or the date filter buttons (This Week, This Month, Custom). The panel should open below the notification bell icon without covering any toolbar elements, ensuring proper z-index layering and positioning so all toolbar controls remain fully visible and accessible when the Reminders panel is open.",
+      "text": "Fix light mode text visibility: ensure all text across every page and component (headings, body text, labels, stat values, sidebar links, card text, etc.) uses dark near-black colors (e.g., #111827 or equivalent dark gray) so they are clearly visible on white/light backgrounds. No light-colored or white text should appear on light backgrounds in light mode.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1",
-          "msg-2"
+          "msg-6",
+          "msg-8"
         ],
         "quotes": [
-          "Reminders is merging please look into the image and rectify",
-          "the Reminders dropdown is covering the Export button and date filter buttons (This Week, This Month, Custom) in the top-right area"
+          "Light mode — text is invisible (likely white/light text on white background) make font darker"
         ]
       },
       "acceptanceCriteria": [
-        "The Reminders dropdown panel does not overlap the Export button when open",
-        "The Reminders dropdown panel does not overlap the This Week, This Month, and Custom date filter buttons when open",
-        "The Reminders panel is positioned so it opens fully visible without clipping other toolbar elements",
-        "All toolbar controls (Export, date filters) remain clickable when Reminders panel is open"
+        "In light mode, all text on Dashboard, Tasks, Projects, Schedule, Activities, Settings, Team pages is dark and readable",
+        "No white or near-white text appears on white or light card/background surfaces in light mode",
+        "CSS custom properties for foreground, card text, muted text, and sidebar text in the light theme use dark values in frontend/src/index.css and frontend/index.css"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Fix color contrast issues across the entire application. Specifically: (1) The 'Done' column header currently has a very dark green background — ensure the header text and icon are clearly readable against it. (2) Task cards in all columns must have sufficient contrast between card background and body text, assignee names, and date text. (3) Status badge text (To Do, In Progress, Done) must contrast clearly against their badge background colors. (4) Column header badges (task count circles) must have readable text on their background. (5) All body text throughout the app must meet a minimum contrast ratio of 4.5:1 against its background. Avoid pairing similarly dark or similarly light colors for text and background.",
+      "text": "Update the dark mode color scheme to use teal as the primary accent color throughout the entire application. Replace existing purple/violet/orange accent colors in dark mode with teal shades (e.g., teal-400 #2dd4bf, teal-500 #14b8a6, teal-600 #0d9488). This includes: active sidebar item highlight, buttons (New Task, primary actions), badges, progress bars, icons, chart accent colors, active nav indicators, and any other accent-colored elements. The dark background (near-black) should remain, only the accent/highlight colors change to teal.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1",
-          "msg-2"
+          "msg-6",
+          "msg-8"
         ],
         "quotes": [
-          "color formating of font and bg should be contrast not the same",
-          "the 'Done' column has a dark green background with low-contrast text, and several other elements (cards, badges, headers) need better contrast"
+          "Dark mode make it teal color shade"
         ]
       },
       "acceptanceCriteria": [
-        "The Done column header text and icon are clearly legible against the dark green background",
-        "Task card body text (title, description, assignee, date) has strong contrast against the card background in all columns",
-        "Status badge labels (To Do, In Progress, Done) are clearly readable — text color contrasts sufficiently with badge background",
-        "Column count badges show readable numerals against their background",
-        "No text-on-background pairing in the app uses the same or near-identical hue/lightness for both",
-        "Contrast ratio for all body text meets at least 4.5:1 against its direct background"
+        "In dark mode, the active sidebar navigation item is highlighted in teal",
+        "Primary action buttons (e.g., '+ New Task') use teal background in dark mode",
+        "Progress bars, badges, and accent icons use teal shades in dark mode",
+        "No purple or orange accent colors remain in dark mode",
+        "Dark background color (near-black) is preserved — only accent colors change",
+        "Teal accent CSS variables are defined and applied for dark theme in frontend/src/index.css"
       ]
     }
   ],
   "constraints": [
-    "Do not change the backend schema or any backend logic",
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui"
+    "Do not change the dark mode background color (keep near-black/dark gray backgrounds)",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
+    "Do not alter any backend logic or data models"
   ],
   "nonGoals": [
-    "Adding new features or pages",
-    "Changing the overall dark theme of the application",
-    "Modifying backend task data or status logic"
+    "Adding new color picker or theme selector UI",
+    "Changing light mode accent colors",
+    "Any backend changes",
+    "Adding new pages or features"
   ],
   "imageRequirements": {
     "required": [],

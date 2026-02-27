@@ -1,61 +1,230 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix Reminders panel overlap and color contrast issues",
+  "title": "Fix light mode text visibility and update dark mode to teal color scheme",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Reposition Reminders dropdown panel to prevent overlap with toolbar controls",
+      "summary": "Fix light mode text visibility by ensuring all text uses dark colors on light backgrounds",
       "acceptanceCriteria": [
-        "The Reminders dropdown panel does not overlap the Export button when open",
-        "The Reminders dropdown panel does not overlap the This Week, This Month, and Custom date filter buttons when open",
-        "The Reminders panel is positioned so it opens fully visible without clipping other toolbar elements",
-        "All toolbar controls (Export, date filters) remain clickable when Reminders panel is open"
+        "In light mode, all text on Dashboard, Tasks, Projects, Schedule, Activities, Settings, Team pages is dark and readable",
+        "No white or near-white text appears on white or light card/background surfaces in light mode",
+        "CSS custom properties for foreground, card text, muted text, and sidebar text in the light theme use dark values in frontend/src/index.css and frontend/index.css"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/NotificationBell.tsx",
+          "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Fix the positioning of the reminders dropdown panel by adjusting the positioning classes from 'right-0' to 'right-0 top-full' to ensure it opens below the bell icon without overlapping toolbar elements. Update the z-index to ensure proper layering above content but below any modal overlays. Adjust the panel width and max-width if needed to prevent it from extending too far right and overlapping adjacent buttons. Consider adding negative left offset or adjusting right positioning to account for the panel's width relative to the bell icon."
+          "description": "Update light theme CSS custom properties to use dark colors for all text variants. Set --foreground to 222.2 47.4% 11.2% (near-black), --card-foreground to 222.2 47.4% 11.2%, --muted-foreground to 215.4 16.3% 46.9% (dark gray), --sidebar-foreground to 222.2 47.4% 11.2%, and --sidebar-foreground-muted to 215.4 16.3% 46.9%. Ensure all light mode text color variables use OKLCH values that render as dark/near-black colors on light backgrounds."
+        },
+        {
+          "path": "frontend/index.css",
+          "operation": "modify",
+          "description": "Update light theme CSS custom properties in the root-level stylesheet to match the changes in frontend/src/index.css. Ensure consistency across both CSS files for --foreground, --card-foreground, --muted-foreground, --sidebar-foreground, and --sidebar-foreground-muted variables in light mode."
+        },
+        {
+          "path": "frontend/src/components/AppSidebar.tsx",
+          "operation": "modify",
+          "description": "Review all text elements (navigation links, search placeholder, project list items, collapsed labels) to ensure they use text-foreground or text-sidebar-foreground classes that inherit the dark color values from the updated CSS variables. Remove any hardcoded white/light text colors in light mode."
+        },
+        {
+          "path": "frontend/src/components/StatsCard.tsx",
+          "operation": "modify",
+          "description": "Ensure stat values and labels use text-foreground or text-card-foreground classes. Remove any hardcoded light text colors that would render poorly on white/light card backgrounds in light mode."
+        },
+        {
+          "path": "frontend/src/components/TaskCard.tsx",
+          "operation": "modify",
+          "description": "Review task title, description, deadline, and all text elements to ensure they use semantic color classes (text-foreground, text-muted-foreground) that respect the CSS variable updates. Verify no hardcoded white/light colors remain."
+        },
+        {
+          "path": "frontend/src/components/OngoingTaskCard.tsx",
+          "operation": "modify",
+          "description": "Ensure task title, description, tags, and assignee text use text-foreground or text-card-foreground classes. Remove any light text colors that conflict with light mode readability."
+        },
+        {
+          "path": "frontend/src/components/ProjectRow.tsx",
+          "operation": "modify",
+          "description": "Review project name, status, budget, deadline text to ensure they use dark foreground colors in light mode via CSS variable-based classes."
+        },
+        {
+          "path": "frontend/src/components/TeamMemberCard.tsx",
+          "operation": "modify",
+          "description": "Ensure member names, status text, and task counts use dark text colors in light mode by applying text-foreground or text-card-foreground classes."
+        },
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "Review greeting text, headings, and all text content on the dashboard to ensure they use text-foreground classes that inherit dark colors in light mode."
+        },
+        {
+          "path": "frontend/src/pages/Tasks.tsx",
+          "operation": "modify",
+          "description": "Ensure all text elements (page title, filter labels, task list text) use dark foreground colors in light mode via semantic Tailwind classes."
+        },
+        {
+          "path": "frontend/src/pages/Projects.tsx",
+          "operation": "modify",
+          "description": "Review project list text, headings, and labels to ensure they use text-foreground or text-muted-foreground classes for dark text in light mode."
+        },
+        {
+          "path": "frontend/src/pages/Schedule.tsx",
+          "operation": "modify",
+          "description": "Ensure calendar event text, date labels, and all schedule text uses dark colors in light mode via CSS variable-based classes."
+        },
+        {
+          "path": "frontend/src/pages/Activities.tsx",
+          "operation": "modify",
+          "description": "Review activity log entries, user names, timestamps, and action descriptions to ensure they use text-foreground and text-muted-foreground classes for dark text in light mode."
+        },
+        {
+          "path": "frontend/src/pages/Settings.tsx",
+          "operation": "modify",
+          "description": "Ensure settings labels, section headings, descriptions, and all text uses dark foreground colors in light mode."
+        },
+        {
+          "path": "frontend/src/pages/TeamMembers.tsx",
+          "operation": "modify",
+          "description": "Review team member stat labels, headings, and card text to ensure they use dark text colors in light mode."
+        },
+        {
+          "path": "frontend/src/components/RightPanel.tsx",
+          "operation": "modify",
+          "description": "Ensure mini calendar labels, tasks checklist text, team members list text, and footer text use dark colors in light mode via CSS variable-based classes."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Fix color contrast issues across task cards, column headers, status badges, and all text elements",
+      "summary": "Update dark mode color scheme to use teal as the primary accent color",
       "acceptanceCriteria": [
-        "The Done column header text and icon are clearly legible against the dark green background",
-        "Task card body text (title, description, assignee, date) has strong contrast against the card background in all columns",
-        "Status badge labels (To Do, In Progress, Done) are clearly readable — text color contrasts sufficiently with badge background",
-        "Column count badges show readable numerals against their background",
-        "No text-on-background pairing in the app uses the same or near-identical hue/lightness for both",
-        "Contrast ratio for all body text meets at least 4.5:1 against its direct background"
+        "In dark mode, the active sidebar navigation item is highlighted in teal",
+        "Primary action buttons (e.g., '+ New Task') use teal background in dark mode",
+        "Progress bars, badges, and accent icons use teal shades in dark mode",
+        "No purple or orange accent colors remain in dark mode",
+        "Dark background color (near-black) is preserved — only accent colors change",
+        "Teal accent CSS variables are defined and applied for dark theme in frontend/src/index.css"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/KanbanBoard.tsx",
+          "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Update the Done column header styling to ensure high contrast between the dark green background and header text/icon. Change the header text color from the current muted color to a bright color like 'text-white' or 'text-green-50'. Ensure the column count badge (the number bubble) has sufficient contrast by using a lighter badge background (e.g., 'bg-green-100') with dark text ('text-green-900') or white text on a darker green badge. Also review the To Do and In Progress column headers to ensure their count badges have adequate contrast against their respective backgrounds."
+          "description": "Update dark theme CSS custom properties to use teal accent colors. Replace existing purple/violet/orange accent values with teal shades: --primary to 79.61% 0.163 180.52 (teal-500 #14b8a6), --primary-foreground to white, --accent to 82.09% 0.156 180.84 (teal-400 #2dd4bf), --accent-foreground to dark. Update --chart-1 through --chart-5 to use teal-based gradient (teal-500, teal-400, teal-300, teal-600, teal-200). Preserve dark background colors (--background, --card). Ensure --ring uses teal for focus states."
         },
         {
-          "path": "frontend/src/components/TaskCard.tsx",
+          "path": "frontend/index.css",
           "operation": "modify",
-          "description": "Improve contrast for all text elements within task cards across all columns. Ensure the task title uses a high-contrast color like 'text-foreground' or 'text-gray-100' in dark mode. Update assignee name text to use a clearly contrasting color (avoid muted grays that blend with card backgrounds). Ensure date/deadline text has sufficient contrast by using colors like 'text-gray-200' or 'text-gray-100' instead of 'text-gray-400'. Review and adjust the card background opacity or color to ensure separation from body text. If using semi-transparent backgrounds, ensure the final computed color provides at least 4.5:1 contrast ratio with overlaid text."
+          "description": "Update dark theme CSS custom properties in the root-level stylesheet to match the teal accent changes in frontend/src/index.css. Ensure consistency for --primary, --accent, --chart variables, and --ring in dark mode."
         },
         {
-          "path": "frontend/src/components/StatusBadgeDropdown.tsx",
+          "path": "frontend/src/components/AppSidebar.tsx",
           "operation": "modify",
-          "description": "Fix contrast issues in status badges by ensuring badge text colors are clearly readable against their background colors. For the Done badge with green background, use white or very light text (e.g., 'text-white' or 'text-green-50'). For In Progress badge with blue background, use white or very light text. For To Do badge, ensure adequate contrast between text and badge background. Update the badge styling to use strongly contrasting text-background pairs that meet WCAG AA standards (4.5:1 minimum contrast ratio)."
+          "description": "Update active navigation item highlight styles to use bg-primary or bg-accent classes (which now use teal in dark mode). Replace any hardcoded purple/violet background colors on active sidebar links with CSS variable-based classes that respect the teal accent."
+        },
+        {
+          "path": "frontend/src/components/CreateTaskModal.tsx",
+          "operation": "modify",
+          "description": "Ensure the primary submit button uses bg-primary or button-primary classes that inherit teal background in dark mode. Remove any hardcoded purple/violet button colors."
+        },
+        {
+          "path": "frontend/src/components/AddTaskModal.tsx",
+          "operation": "modify",
+          "description": "Update the 'Add Task' button to use bg-primary class for teal background in dark mode. Remove hardcoded purple/violet colors."
+        },
+        {
+          "path": "frontend/src/components/EditTaskModal.tsx",
+          "operation": "modify",
+          "description": "Ensure the 'Save' button uses bg-primary class for teal background in dark mode."
+        },
+        {
+          "path": "frontend/src/components/InlineTaskForm.tsx",
+          "operation": "modify",
+          "description": "Update any primary action buttons in the inline form to use bg-primary class for teal accent in dark mode."
+        },
+        {
+          "path": "frontend/src/components/PersistentTaskForm.tsx",
+          "operation": "modify",
+          "description": "Ensure submit button uses bg-primary class for teal background in dark mode."
         },
         {
           "path": "frontend/src/components/PriorityBadge.tsx",
           "operation": "modify",
-          "description": "Review and update priority badge contrast to ensure the text label (High, Medium, Low) is clearly readable against the badge background color. Adjust text colors to provide high contrast: use dark text on light badge backgrounds or white text on dark badge backgrounds. Ensure the emoji and text combination does not create visual confusion due to poor contrast."
+          "description": "Update High priority badge styling to use teal-based colors in dark mode (bg-teal-500/10 text-teal-400 or similar). Remove purple/orange badge colors for high priority."
         },
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/src/components/StatusBadgeDropdown.tsx",
           "operation": "modify",
-          "description": "Review and adjust global CSS custom properties for dark theme to ensure all color tokens provide sufficient contrast when used together. Update foreground, muted-foreground, and card-foreground color definitions to ensure text on backgrounds meets a minimum 4.5:1 contrast ratio. Consider lightening foreground colors or darkening background colors in dark mode to improve readability across the entire application. Ensure theme consistency by testing color combinations used in cards, badges, headers, and body text."
+          "description": "Update status badge accent colors to use teal shades in dark mode. Replace any purple/orange badge backgrounds with teal variants."
+        },
+        {
+          "path": "frontend/src/components/TaskCard.tsx",
+          "operation": "modify",
+          "description": "Update progress bars, priority badges, and any accent-colored icons to use teal shades in dark mode. Replace hardcoded purple/orange colors with bg-accent, text-primary, or teal Tailwind classes."
+        },
+        {
+          "path": "frontend/src/components/OngoingTaskCard.tsx",
+          "operation": "modify",
+          "description": "Update gradient styling (if using accent colors) to use teal in dark mode. Replace purple/violet gradients with teal-based gradients (from-teal-500 to-teal-600)."
+        },
+        {
+          "path": "frontend/src/components/StatsCard.tsx",
+          "operation": "modify",
+          "description": "Update icon background or accent colors to use teal in dark mode. Replace purple/orange icon backgrounds with bg-teal-500/10 or similar teal variants."
+        },
+        {
+          "path": "frontend/src/components/NotificationBell.tsx",
+          "operation": "modify",
+          "description": "Update notification badge background to use bg-primary or bg-teal-500 in dark mode. Remove purple/orange badge colors."
+        },
+        {
+          "path": "frontend/src/components/TasksChecklist.tsx",
+          "operation": "modify",
+          "description": "Update progress bar to use bg-primary or bg-teal-500 in dark mode. Replace purple/orange progress indicator with teal."
+        },
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "Update any accent-colored elements (progress indicators, highlight borders, active states) to use teal in dark mode. Replace purple/orange accents with teal via CSS variable-based classes."
+        },
+        {
+          "path": "frontend/src/pages/Tasks.tsx",
+          "operation": "modify",
+          "description": "Ensure the '+ New Task' button uses bg-primary class for teal background in dark mode. Update any accent-colored UI elements (active filters, badges) to use teal."
+        },
+        {
+          "path": "frontend/src/pages/Projects.tsx",
+          "operation": "modify",
+          "description": "Update project progress bars and accent elements to use teal in dark mode. Replace purple/orange progress indicators with teal."
+        },
+        {
+          "path": "frontend/src/pages/Schedule.tsx",
+          "operation": "modify",
+          "description": "Update calendar event accent colors and active date highlights to use teal in dark mode. Replace purple/orange accents."
+        },
+        {
+          "path": "frontend/src/pages/Activities.tsx",
+          "operation": "modify",
+          "description": "Update activity type icons or accent colors to use teal in dark mode. Remove purple/orange icon backgrounds."
+        },
+        {
+          "path": "frontend/src/pages/Settings.tsx",
+          "operation": "modify",
+          "description": "Update active setting item highlights and toggle switches to use teal in dark mode. Replace purple/orange active states."
+        },
+        {
+          "path": "frontend/src/pages/TeamMembers.tsx",
+          "operation": "modify",
+          "description": "Update 'Add Team Member' button and any accent UI elements to use teal in dark mode via bg-primary class."
+        },
+        {
+          "path": "frontend/src/pages/Login.tsx",
+          "operation": "modify",
+          "description": "Update sign-in button to use bg-primary class for teal background in dark mode. Replace any purple/blue button colors with teal accent."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Verify Tailwind configuration correctly maps teal utility classes (teal-400, teal-500, teal-600) to the OKLCH values defined in index.css. Ensure no conflicting purple/orange color mappings remain in the theme extension."
         }
       ]
     }

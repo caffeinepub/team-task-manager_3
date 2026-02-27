@@ -1,13 +1,20 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createRouter, RouterProvider, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
+import {
+  createRouter,
+  RouterProvider,
+  createRoute,
+  createRootRoute,
+  Outlet,
+} from '@tanstack/react-router';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
-import { useInternetIdentity } from './hooks/useInternetIdentity';
-import Layout from './components/Layout';
+import AppLayout from './components/AppLayout';
 import Dashboard from './pages/Dashboard';
-import Tasks from './pages/Tasks';
-import TeamMembers from './pages/TeamMembers';
-import Login from './pages/Login';
+import MyTasks from './pages/MyTasks';
+import Projects from './pages/Projects';
+import Schedule from './pages/Schedule';
+import Activities from './pages/Activities';
+import Settings from './pages/Settings';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,38 +25,13 @@ const queryClient = new QueryClient({
   },
 });
 
-// Root route with auth guard
-function AuthGuard() {
-  const { identity, isInitializing } = useInternetIdentity();
-  const isAuthenticated = !!identity;
-
-  if (isInitializing) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground text-sm">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Login />;
-  }
-
-  return (
-    <Layout>
-      <Outlet />
-    </Layout>
-  );
-}
-
 const rootRoute = createRootRoute({
   component: () => (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-        <AuthGuard />
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+        <AppLayout>
+          <Outlet />
+        </AppLayout>
         <Toaster richColors position="top-right" />
       </ThemeProvider>
     </QueryClientProvider>
@@ -62,29 +44,43 @@ const indexRoute = createRoute({
   component: Dashboard,
 });
 
-const tasksRoute = createRoute({
+const myTasksRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/tasks',
-  component: Tasks,
+  path: '/my-tasks',
+  component: MyTasks,
 });
 
-const teamRoute = createRoute({
+const projectsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/team',
-  component: TeamMembers,
+  path: '/projects',
+  component: Projects,
 });
 
-const teamMembersRoute = createRoute({
+const scheduleRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/team-members',
-  component: TeamMembers,
+  path: '/schedule',
+  component: Schedule,
+});
+
+const activitiesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/activities',
+  component: Activities,
+});
+
+const settingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/settings',
+  component: Settings,
 });
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
-  tasksRoute,
-  teamRoute,
-  teamMembersRoute,
+  myTasksRoute,
+  projectsRoute,
+  scheduleRoute,
+  activitiesRoute,
+  settingsRoute,
 ]);
 
 const router = createRouter({ routeTree });

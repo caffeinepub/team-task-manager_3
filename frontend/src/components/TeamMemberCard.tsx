@@ -1,106 +1,87 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, User, CheckCircle, Clock } from 'lucide-react';
-import { TeamMember } from '../backend';
-import { useGetTasksByAssignee } from '../hooks/useQueries';
-import { TaskStatus } from '../backend';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { TeamMember, Task, TaskStatus } from '../backend';
 
 interface TeamMemberCardProps {
   member: TeamMember;
-  isAdmin: boolean;
+  tasks?: Task[];
+  showTasks?: boolean;
+  onRemove?: (id: bigint) => void;
 }
 
-function getInitials(name: string): string {
-  return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
-}
-
-const avatarColors = [
-  'bg-purple-500/20 text-purple-300 border-purple-500/30',
-  'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  'bg-green-500/20 text-green-300 border-green-500/30',
-  'bg-orange-500/20 text-orange-300 border-orange-500/30',
-  'bg-pink-500/20 text-pink-300 border-pink-500/30',
-];
-
-export default function TeamMemberCard({ member, isAdmin }: TeamMemberCardProps) {
+export default function TeamMemberCard({ member, tasks = [], showTasks = false, onRemove }: TeamMemberCardProps) {
   const [expanded, setExpanded] = useState(false);
-  const { data: tasks = [] } = useGetTasksByAssignee(member.name);
 
-  const colorClass = avatarColors[Number(member.id) % avatarColors.length];
-  const completedTasks = tasks.filter((t) => t.status === TaskStatus.Done).length;
-  const pendingTasks = tasks.filter((t) => t.status !== TaskStatus.Done).length;
+  const doneTasks = tasks.filter(t => t.status === TaskStatus.Done);
+  const pendingTasks = tasks.filter(t => t.status !== TaskStatus.Done);
+
+  const initials = member.name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 card-elevated hover:card-hover transition-all duration-200">
-      {/* Header */}
-      <div className="flex items-start gap-3 mb-4">
-        <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center flex-shrink-0 ${colorClass}`}>
-          <span className="text-sm font-bold">{getInitials(member.name)}</span>
+    <div className="bg-card rounded-xl border border-border p-4 card-shadow hover:shadow-md transition-all">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+          <span className="text-primary font-bold text-sm">{initials}</span>
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-foreground truncate">{member.name}</h3>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium bg-muted text-muted-foreground border border-border">
-              <User size={10} />
-              Member
-            </span>
-            <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
-              member.claimedBy
-                ? 'bg-green-500/15 text-green-400'
-                : 'bg-muted text-muted-foreground'
-            }`}>
-              {member.claimedBy ? '● Active' : '○ Unclaimed'}
-            </span>
-          </div>
+          <p className="text-sm font-semibold text-foreground truncate">{member.name}</p>
+          <p className="text-xs text-muted-foreground">
+            {member.claimedBy ? 'Active' : 'Unclaimed'}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {showTasks && tasks.length > 0 && (
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+          )}
+          {onRemove && (
+            <button
+              onClick={() => onRemove(member.id)}
+              className="text-xs text-destructive hover:text-destructive/80 transition-colors px-2 py-1 rounded-lg hover:bg-destructive/10"
+            >
+              Remove
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Task Stats */}
-      <div className="grid grid-cols-2 gap-2 mb-4">
-        <div className="bg-muted rounded-xl p-2.5 text-center">
-          <div className="flex items-center justify-center gap-1 text-green-400 mb-0.5">
-            <CheckCircle size={12} />
-            <span className="text-sm font-bold">{completedTasks}</span>
-          </div>
+      <div className="flex gap-4 mt-3 pt-3 border-t border-border">
+        <div className="text-center">
+          <p className="text-lg font-bold text-foreground">{doneTasks.length}</p>
           <p className="text-xs text-muted-foreground">Done</p>
         </div>
-        <div className="bg-muted rounded-xl p-2.5 text-center">
-          <div className="flex items-center justify-center gap-1 text-blue-400 mb-0.5">
-            <Clock size={12} />
-            <span className="text-sm font-bold">{pendingTasks}</span>
-          </div>
+        <div className="text-center">
+          <p className="text-lg font-bold text-foreground">{pendingTasks.length}</p>
           <p className="text-xs text-muted-foreground">Pending</p>
+        </div>
+        <div className="text-center">
+          <p className="text-lg font-bold text-foreground">{tasks.length}</p>
+          <p className="text-xs text-muted-foreground">Total</p>
         </div>
       </div>
 
-      {/* Expand for task details (admin only) */}
-      {isAdmin && tasks.length > 0 && (
-        <div>
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors w-full justify-center py-1"
-          >
-            {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-            {expanded ? 'Hide Tasks' : `View ${tasks.length} Task${tasks.length !== 1 ? 's' : ''}`}
-          </button>
-
-          {expanded && (
-            <div className="mt-3 pt-3 border-t border-border space-y-1.5">
-              {tasks.slice(0, 5).map((task) => (
-                <div key={task.id.toString()} className="flex items-center gap-2 text-xs">
-                  <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                    task.status === TaskStatus.Done ? 'bg-green-400' :
-                    task.status === TaskStatus.InProgress ? 'bg-blue-400' : 'bg-muted-foreground'
-                  }`} />
-                  <span className={`truncate ${task.status === TaskStatus.Done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                    {task.title}
-                  </span>
-                </div>
-              ))}
-              {tasks.length > 5 && (
-                <p className="text-xs text-muted-foreground text-center">+{tasks.length - 5} more</p>
-              )}
+      {expanded && tasks.length > 0 && (
+        <div className="mt-3 space-y-2">
+          {tasks.map(task => (
+            <div key={String(task.id)} className="flex items-center gap-2 text-xs">
+              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                task.status === TaskStatus.Done ? 'bg-emerald-500' :
+                task.status === TaskStatus.InProgress ? 'bg-amber-500' : 'bg-slate-400'
+              }`} />
+              <span className={`text-foreground truncate ${task.status === TaskStatus.Done ? 'line-through text-muted-foreground' : ''}`}>
+                {task.title}
+              </span>
             </div>
-          )}
+          ))}
         </div>
       )}
     </div>

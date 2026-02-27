@@ -1,15 +1,14 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the Reminders dropdown panel overlap with toolbar elements and improve color contrast throughout the application.
+**Goal:** Fix invisible text in light mode and update dark mode accent colors to a teal color scheme.
 
 **Planned changes:**
-- Reposition the Reminders dropdown panel so it opens below the notification bell icon without overlapping the Export button or the date filter buttons (This Week, This Month, Custom)
-- Ensure proper z-index layering so all toolbar controls remain fully visible and accessible when the Reminders panel is open
-- Fix the Done column header so its text and icon are clearly readable against the dark green background
-- Improve contrast between task card backgrounds and body text (title, description, assignee names, date text) in all columns
-- Ensure status badge labels (To Do, In Progress, Done) have sufficient contrast between text and badge background colors
-- Ensure column count badge numerals are readable against their background
-- Fix all body text throughout the app to meet a minimum contrast ratio of 4.5:1 against its background
+- In light mode, update all text colors (headings, body, labels, stat values, sidebar links, card text, etc.) to dark near-black values (e.g., #111827) so they are readable on white/light backgrounds
+- Update CSS custom properties for foreground, card text, muted text, and sidebar text in the light theme to use dark values
+- In dark mode, replace all purple/violet/orange accent colors with teal shades (teal-400 #2dd4bf, teal-500 #14b8a6, teal-600 #0d9488)
+- Apply teal accents to: active sidebar highlight, primary action buttons (e.g., "+ New Task"), progress bars, badges, icons, chart accents, and active nav indicators
+- Define teal accent CSS variables for the dark theme
+- Preserve the dark near-black background in dark mode
 
-**User-visible outcome:** The Reminders panel no longer covers toolbar controls, and all text throughout the app is clearly readable with proper contrast against its background.
+**User-visible outcome:** In light mode, all text is clearly visible and readable. In dark mode, the application uses a teal accent color scheme instead of purple/orange, while keeping the dark background intact.

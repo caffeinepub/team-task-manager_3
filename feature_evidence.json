@@ -2,10 +2,24 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-reposition-the-reminders-dropdown-panel-so-it-does-not-overlap-the-export-button-or-the-date-filter-buttons-this-week-this-month-custom-the-panel-should-open-below-the-notification-bell-icon-without-covering-any-toolbar-elements-ensuring-proper-z-index-layering-and-positioning-so-all-toolbar-controls-remain-fully-visible-and-accessible-when-the-reminders-panel-is-open",
-      "featureTitle": "Reposition the Reminders dropdown panel so it does not overlap the Export button or the date filter buttons (This Week, This Month, Custom). The panel should open below the notification bell icon without covering any toolbar elements, ensuring proper z-index layering and positioning so all toolbar controls remain fully visible and accessible when the Reminders panel is open.",
+      "featureId": "feature-fix-light-mode-text-visibility-ensure-all-text-across-every-page-and-component-headings-body-text-labels-stat-values-sidebar-links-card-text-etc-uses-dark-near-black-colors-e-g-111827-or-equivalent-dark-gray-so-they-are-clearly-visible-on-white-light-backgrounds-no-light-colored-or-white-text-should-appear-on-light-backgrounds-in-light-mode",
+      "featureTitle": "Fix light mode text visibility: ensure all text across every page and component (headings, body text, labels, stat values, sidebar links, card text, etc.) uses dark near-black colors (e.g., #111827 or equivalent dark gray) so they are clearly visible on white/light backgrounds. No light-colored or white text should appear on light backgrounds in light mode.",
       "files": [
-        "frontend/src/components/NotificationBell.tsx"
+        "frontend/src/components/AppSidebar.tsx",
+        "frontend/src/components/OngoingTaskCard.tsx",
+        "frontend/src/components/ProjectRow.tsx",
+        "frontend/src/components/RightPanel.tsx",
+        "frontend/src/components/StatsCard.tsx",
+        "frontend/src/components/TaskCard.tsx",
+        "frontend/src/components/TeamMemberCard.tsx",
+        "frontend/src/index.css",
+        "frontend/src/pages/Activities.tsx",
+        "frontend/src/pages/Dashboard.tsx",
+        "frontend/src/pages/Projects.tsx",
+        "frontend/src/pages/Schedule.tsx",
+        "frontend/src/pages/Settings.tsx",
+        "frontend/src/pages/Tasks.tsx",
+        "frontend/src/pages/TeamMembers.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -21,13 +35,27 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-fix-color-contrast-issues-across-the-entire-application-specifically-1-the-done-column-header-currently-has-a-very-dark-green-background-ensure-the-header-text-and-icon-are-clearly-readable-against-it-2-task-cards-in-all-columns-must-have-sufficient-contrast-between-card-background-and-body-text-assignee-names-and-date-text-3-status-badge-text-to-do-in-progress-done-must-contrast-clearly-against-their-badge-background-colors-4-column-header-badges-task-count-circles-must-have-readable-text-on-their-background-5-all-body-text-throughout-the-app-must-meet-a-minimum-contrast-ratio-of-4-5-1-against-its-background-avoid-pairing-similarly-dark-or-similarly-light-colors-for-text-and-background",
-      "featureTitle": "Fix color contrast issues across the entire application. Specifically: (1) The 'Done' column header currently has a very dark green background — ensure the header text and icon are clearly readable against it. (2) Task cards in all columns must have sufficient contrast between card background and body text, assignee names, and date text. (3) Status badge text (To Do, In Progress, Done) must contrast clearly against their badge background colors. (4) Column header badges (task count circles) must have readable text on their background. (5) All body text throughout the app must meet a minimum contrast ratio of 4.5:1 against its background. Avoid pairing similarly dark or similarly light colors for text and background.",
+      "featureId": "feature-update-the-dark-mode-color-scheme-to-use-teal-as-the-primary-accent-color-throughout-the-entire-application-replace-existing-purple-violet-orange-accent-colors-in-dark-mode-with-teal-shades-e-g-teal-400-2dd4bf-teal-500-14b8a6-teal-600-0d9488-this-includes-active-sidebar-item-highlight-buttons-new-task-primary-actions-badges-progress-bars-icons-chart-accent-colors-active-nav-indicators-and-any-other-accent-colored-elements-the-dark-background-near-black-should-remain-only-the-accent-highlight-colors-change-to-teal",
+      "featureTitle": "Update the dark mode color scheme to use teal as the primary accent color throughout the entire application. Replace existing purple/violet/orange accent colors in dark mode with teal shades (e.g., teal-400 #2dd4bf, teal-500 #14b8a6, teal-600 #0d9488). This includes: active sidebar item highlight, buttons (New Task, primary actions), badges, progress bars, icons, chart accent colors, active nav indicators, and any other accent-colored elements. The dark background (near-black) should remain, only the accent/highlight colors change to teal.",
       "files": [
-        "frontend/src/components/KanbanBoard.tsx",
+        "frontend/src/components/AppSidebar.tsx",
+        "frontend/src/components/NotificationBell.tsx",
+        "frontend/src/components/OngoingTaskCard.tsx",
         "frontend/src/components/PriorityBadge.tsx",
+        "frontend/src/components/StatsCard.tsx",
         "frontend/src/components/StatusBadgeDropdown.tsx",
-        "frontend/src/components/TaskCard.tsx"
+        "frontend/src/components/TaskCard.tsx",
+        "frontend/src/components/TasksChecklist.tsx",
+        "frontend/src/index.css",
+        "frontend/src/pages/Activities.tsx",
+        "frontend/src/pages/Dashboard.tsx",
+        "frontend/src/pages/Login.tsx",
+        "frontend/src/pages/Projects.tsx",
+        "frontend/src/pages/Schedule.tsx",
+        "frontend/src/pages/Settings.tsx",
+        "frontend/src/pages/Tasks.tsx",
+        "frontend/src/pages/TeamMembers.tsx",
+        "frontend/tailwind.config.js"
       ],
       "components": [
         "core-infrastructure@1.0.2",

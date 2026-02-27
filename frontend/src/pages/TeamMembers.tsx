@@ -1,110 +1,115 @@
 import React, { useState } from 'react';
-import { Users, UserCheck, UserX, Plus } from 'lucide-react';
-import { useListTeamMembers, useIsCallerAdmin } from '../hooks/useQueries';
+import { Users, UserPlus, Search } from 'lucide-react';
+import { useListTeamMembers, useGetTasks, useRemoveTeamMember } from '../hooks/useQueries';
 import TeamMemberCard from '../components/TeamMemberCard';
 import AddTeamMemberModal from '../components/AddTeamMemberModal';
-import { Button } from '@/components/ui/button';
 
 export default function TeamMembers() {
-  const [addMemberOpen, setAddMemberOpen] = useState(false);
   const { data: members = [], isLoading } = useListTeamMembers();
-  const { data: isAdmin } = useIsCallerAdmin();
+  const { data: tasks = [] } = useGetTasks();
+  const { mutate: removeMember } = useRemoveTeamMember();
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredMembers = members.filter(m =>
+    m.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const totalMembers = members.length;
-  const claimedMembers = members.filter((m) => m.claimedBy).length;
-  const unclaimedMembers = members.filter((m) => !m.claimedBy).length;
+  const activeMembers = members.filter(m => m.claimedBy).length;
+  const unclaimedMembers = members.filter(m => !m.claimedBy).length;
 
-  const statCards = [
-    {
-      label: 'Total Members',
-      value: totalMembers,
-      icon: <Users size={20} />,
-      color: 'text-purple-400',
-      bg: 'bg-purple-500/10',
-      border: 'border-purple-500/20',
-    },
-    {
-      label: 'Active',
-      value: claimedMembers,
-      icon: <UserCheck size={20} />,
-      color: 'text-green-400',
-      bg: 'bg-green-500/10',
-      border: 'border-green-500/20',
-    },
-    {
-      label: 'Unclaimed',
-      value: unclaimedMembers,
-      icon: <UserX size={20} />,
-      color: 'text-yellow-400',
-      bg: 'bg-yellow-500/10',
-      border: 'border-yellow-500/20',
-    },
-  ];
+  const getTasksForMember = (memberName: string) =>
+    tasks.filter(t => t.assignees.includes(memberName));
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Team Members</h1>
-          <p className="text-muted-foreground text-sm mt-1">Manage your team</p>
-        </div>
-        {isAdmin && (
-          <Button
-            onClick={() => setAddMemberOpen(true)}
-            className="bg-purple-500 hover:bg-purple-600 text-white gap-2 rounded-xl shadow-glow-sm"
+    <div className="flex-1 overflow-y-auto bg-background">
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-6 py-4">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-xl font-bold text-foreground">Team Members</h1>
+            <p className="text-sm text-muted-foreground">{totalMembers} members total</p>
+          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary/90 transition-all shadow-sm"
           >
-            <Plus size={16} />
+            <UserPlus className="w-4 h-4" />
             Add Member
-          </Button>
+          </button>
+        </div>
+      </div>
+
+      <div className="p-6 space-y-6">
+        {/* Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="bg-card rounded-2xl p-4 border border-border card-shadow text-center">
+            <p className="text-2xl font-bold text-foreground">{totalMembers}</p>
+            <p className="text-xs text-muted-foreground mt-1">Total Members</p>
+          </div>
+          <div className="bg-card rounded-2xl p-4 border border-border card-shadow text-center">
+            <p className="text-2xl font-bold text-emerald-500">{activeMembers}</p>
+            <p className="text-xs text-muted-foreground mt-1">Active</p>
+          </div>
+          <div className="bg-card rounded-2xl p-4 border border-border card-shadow text-center">
+            <p className="text-2xl font-bold text-amber-500">{unclaimedMembers}</p>
+            <p className="text-xs text-muted-foreground mt-1">Unclaimed</p>
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search members..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="w-full bg-muted text-foreground placeholder-muted-foreground text-sm pl-9 pr-4 py-2 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+
+        {/* Members Grid */}
+        {isLoading ? (
+          <div className="flex items-center justify-center h-48">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : filteredMembers.length === 0 ? (
+          <div className="text-center py-16">
+            <Users className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
+            <p className="text-muted-foreground">
+              {searchQuery ? 'No members match your search' : 'No team members yet'}
+            </p>
+            {!searchQuery && (
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="mt-3 text-sm text-primary hover:text-primary/80 font-medium transition-colors"
+              >
+                Add your first member
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredMembers.map(member => (
+              <TeamMemberCard
+                key={String(member.id)}
+                member={member}
+                tasks={getTasksForMember(member.name)}
+                showTasks
+                onRemove={(id) => removeMember(id)}
+              />
+            ))}
+          </div>
         )}
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        {statCards.map((card) => (
-          <div
-            key={card.label}
-            className={`bg-card border ${card.border} rounded-2xl p-5 card-elevated`}
-          >
-            <div className={`w-10 h-10 rounded-xl ${card.bg} ${card.color} flex items-center justify-center mb-3`}>
-              {card.icon}
-            </div>
-            <p className="text-3xl font-bold text-foreground">{card.value}</p>
-            <p className="text-muted-foreground text-sm mt-1">{card.label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Members List */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-40 bg-card border border-border rounded-2xl animate-pulse" />
-          ))}
-        </div>
-      ) : members.length === 0 ? (
-        <div className="text-center py-16 bg-card border border-border rounded-2xl text-muted-foreground">
-          <Users size={48} className="mx-auto mb-3 opacity-40" />
-          <p className="font-medium text-foreground">No team members yet</p>
-          <p className="text-sm mt-1">Add your first team member to get started</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {members.map((member) => (
-            <TeamMemberCard
-              key={member.id.toString()}
-              member={member}
-              isAdmin={!!isAdmin}
-            />
-          ))}
-        </div>
+      {showAddModal && (
+        <AddTeamMemberModal
+          open={showAddModal}
+          onOpenChange={setShowAddModal}
+        />
       )}
-
-      <AddTeamMemberModal
-        open={addMemberOpen}
-        onOpenChange={setAddMemberOpen}
-      />
     </div>
   );
 }

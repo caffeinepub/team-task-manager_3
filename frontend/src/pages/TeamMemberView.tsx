@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { CheckCircle, Clock, AlertCircle, User } from 'lucide-react';
-import { useListTeamMembers, useGetTasksByAssignee, useClaimTeamMember } from '../hooks/useQueries';
+import { useListTeamMembers, useGetTasksByAssignee, useClaimTeamMember, useUpdateTaskStatus } from '../hooks/useQueries';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { TaskStatus } from '../backend';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
 import StatusBadgeDropdown from '../components/StatusBadgeDropdown';
 
 function getInitials(name: string): string {
@@ -21,6 +20,7 @@ export default function TeamMemberView() {
   const { identity } = useInternetIdentity();
   const { data: members = [], isLoading: membersLoading } = useListTeamMembers();
   const claimMember = useClaimTeamMember();
+  const { mutate: updateStatus } = useUpdateTaskStatus();
 
   const principal = identity?.getPrincipal();
 
@@ -44,6 +44,10 @@ export default function TeamMemberView() {
     }
   };
 
+  const handleStatusChange = (taskId: bigint, newStatus: TaskStatus) => {
+    updateStatus({ taskId, newStatus });
+  };
+
   if (membersLoading) {
     return (
       <div className="space-y-4 animate-fade-in">
@@ -65,9 +69,9 @@ export default function TeamMemberView() {
 
       {/* Claim Profile Section */}
       {!myMember && (
-        <div className="bg-card border border-border rounded-2xl p-6 card-elevated">
+        <div className="bg-card border border-border rounded-2xl p-6">
           <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-yellow-500/10 text-yellow-400 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center flex-shrink-0">
               <AlertCircle size={20} />
             </div>
             <div className="flex-1">
@@ -103,7 +107,7 @@ export default function TeamMemberView() {
       {/* My Profile Card */}
       {myMember && (
         <>
-          <div className="bg-card border border-border rounded-2xl p-5 card-elevated">
+          <div className="bg-card border border-border rounded-2xl p-5">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-primary/20 border border-primary/30 flex items-center justify-center">
                 <span className="text-primary text-lg font-bold">{getInitials(myMember.name)}</span>
@@ -120,22 +124,22 @@ export default function TeamMemberView() {
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-4">
-            <div className="bg-card border border-border rounded-2xl p-4 card-elevated text-center">
+            <div className="bg-card border border-border rounded-2xl p-4 text-center">
               <div className="flex items-center justify-center gap-1.5 text-muted-foreground mb-1">
                 <Clock size={14} />
                 <span className="text-xs">To Do</span>
               </div>
               <p className="text-2xl font-bold text-foreground">{pending}</p>
             </div>
-            <div className="bg-card border border-blue-500/20 rounded-2xl p-4 card-elevated text-center">
-              <div className="flex items-center justify-center gap-1.5 text-blue-400 mb-1">
+            <div className="bg-card border border-blue-500/20 rounded-2xl p-4 text-center">
+              <div className="flex items-center justify-center gap-1.5 text-blue-500 dark:text-blue-400 mb-1">
                 <Clock size={14} />
                 <span className="text-xs">In Progress</span>
               </div>
               <p className="text-2xl font-bold text-foreground">{inProgress}</p>
             </div>
-            <div className="bg-card border border-green-500/20 rounded-2xl p-4 card-elevated text-center">
-              <div className="flex items-center justify-center gap-1.5 text-green-400 mb-1">
+            <div className="bg-card border border-emerald-500/20 rounded-2xl p-4 text-center">
+              <div className="flex items-center justify-center gap-1.5 text-emerald-500 dark:text-emerald-400 mb-1">
                 <CheckCircle size={14} />
                 <span className="text-xs">Done</span>
               </div>
@@ -144,7 +148,7 @@ export default function TeamMemberView() {
           </div>
 
           {/* Task List */}
-          <div className="bg-card border border-border rounded-2xl p-5 card-elevated">
+          <div className="bg-card border border-border rounded-2xl p-5">
             <h3 className="font-semibold text-foreground mb-4">My Tasks</h3>
             {tasksLoading ? (
               <div className="space-y-3">
@@ -174,8 +178,8 @@ export default function TeamMemberView() {
                     </div>
                     <StatusBadgeDropdown
                       taskId={task.id}
-                      currentStatus={task.status}
-                      taskTitle={task.title}
+                      status={task.status}
+                      onStatusChange={handleStatusChange}
                     />
                   </div>
                 ))}

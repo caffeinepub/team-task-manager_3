@@ -1,18 +1,47 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-27T18:04:30.870Z",
-  "summary": "Both REQ-1 and REQ-2 appear to be implemented in the diff. REQ-1 is addressed in NotificationBell.tsx by repositioning the panel using fixed coordinates calculated from the bell button's bounding rect. REQ-2 is addressed across KanbanBoard.tsx, TaskCard.tsx, StatusBadgeDropdown.tsx, and PriorityBadge.tsx with improved color contrast for column headers, task cards, status badges, and priority badges.",
-  "missing_requirements": [],
+  "generatedAt": "2026-02-27T18:52:30.860Z",
+  "summary": "The diff implements both REQ-1 (light mode text visibility) and REQ-2 (dark mode teal accent scheme) through CSS variable changes in frontend/src/index.css and component-level Tailwind class updates. REQ-1 is partially addressed via CSS variables but has a notable gap: the light mode sidebar still uses dark backgrounds with light text rather than dark text on light backgrounds. REQ-2 appears well-implemented with teal CSS variables for dark mode primary/accent colors, sidebar active states, buttons, progress bars, and chart colors.",
+  "missing_requirements": [
+    {
+      "id": "REQ-1",
+      "requirement": "CSS custom properties for sidebar text in the light theme use dark values — no white or near-white text on light backgrounds in light mode for sidebar",
+      "reason": "In frontend/src/index.css, the light mode :root defines --sidebar-background as oklch(0.12 0.02 240) (very dark) and --sidebar-foreground as oklch(0.92 0.01 240) (near-white). This means the sidebar in light mode has a dark background with light/white text, rather than the required dark text on a light/white background. The acceptance criteria explicitly requires sidebar text CSS properties to use dark values in the light theme.",
+      "evidence": [
+        "frontend/src/index.css"
+      ]
+    }
+  ],
   "hallucinated_features": [],
-  "confidence": 0.9,
+  "confidence": 0.78,
   "changed_files": [
     "frontend-file-summaries.txt",
+    "frontend/src/components/AppSidebar.tsx",
     "frontend/src/components/KanbanBoard.tsx",
+    "frontend/src/components/MiniCalendar.tsx",
     "frontend/src/components/NotificationBell.tsx",
+    "frontend/src/components/OngoingTaskCard.tsx",
     "frontend/src/components/PriorityBadge.tsx",
+    "frontend/src/components/ProjectRow.tsx",
+    "frontend/src/components/RightPanel.tsx",
+    "frontend/src/components/StatsCard.tsx",
     "frontend/src/components/StatusBadgeDropdown.tsx",
     "frontend/src/components/TaskCard.tsx",
+    "frontend/src/components/TasksChecklist.tsx",
+    "frontend/src/components/TeamMemberCard.tsx",
+    "frontend/src/components/TeamMembersList.tsx",
+    "frontend/src/index.css",
+    "frontend/src/pages/Activities.tsx",
+    "frontend/src/pages/Dashboard.tsx",
+    "frontend/src/pages/Login.tsx",
+    "frontend/src/pages/Projects.tsx",
+    "frontend/src/pages/Schedule.tsx",
+    "frontend/src/pages/Settings.tsx",
+    "frontend/src/pages/Tasks.tsx",
+    "frontend/src/pages/TeamMemberView.tsx",
+    "frontend/src/pages/TeamMembers.tsx",
+    "frontend/tailwind.config.js",
     "project_state.json"
   ]
 }
