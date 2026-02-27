@@ -1,227 +1,293 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useCreateTask, useListTeamMembers } from '../hooks/useQueries';
 import { Priority } from '../backend';
-import { useCreateTask } from '../hooks/useQueries';
 import { toast } from 'sonner';
 
 interface CreateTaskModalProps {
   open: boolean;
   onClose: () => void;
-  teamMembers: string[];
 }
 
-export default function CreateTaskModal({ open, onClose, teamMembers }: CreateTaskModalProps) {
+const PREDEFINED_MEMBERS = [
+  'Gurudas',
+  'James',
+  'Jesin',
+  'Pavithra',
+  'Pramila',
+  'Sampath',
+  'Seshadri Pa',
+  'Shabeena',
+  'Shashank',
+  'Vinay',
+  'Veidhehi',
+];
+
+const priorityOptions = [
+  { value: Priority.High, label: 'High', emoji: '🔴', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/30' },
+  { value: Priority.Medium, label: 'Medium', emoji: '🟡', color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/30' },
+  { value: Priority.Low, label: 'Low', emoji: '🟢', color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/30' },
+];
+
+export default function CreateTaskModal({ open, onClose }: CreateTaskModalProps) {
+  const [conference, setConference] = useState('');
+  const [conferenceTouched, setConferenceTouched] = useState(false);
   const [title, setTitle] = useState('');
-  const [conferenceName, setConferenceName] = useState('');
   const [description, setDescription] = useState('');
-  const [assignedTo, setAssignedTo] = useState('');
-  const [deadline, setDeadline] = useState('');
   const [priority, setPriority] = useState<Priority>(Priority.Medium);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [deadline, setDeadline] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [selectedAssignee, setSelectedAssignee] = useState<string>('');
 
   const createTask = useCreateTask();
+  const { data: backendMembers = [] } = useListTeamMembers();
 
-  const validate = () => {
-    const newErrors: Record<string, string> = {};
-    if (!title.trim()) newErrors.title = 'Title is required';
-    if (!assignedTo) newErrors.assignedTo = 'Please assign to a team member';
-    if (!deadline) newErrors.deadline = 'Deadline is required';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const memberNames: string[] =
+    backendMembers.length > 0
+      ? backendMembers.map((m) => m.name)
+      : PREDEFINED_MEMBERS;
+
+  const resetForm = () => {
+    setConference('');
+    setConferenceTouched(false);
+    setTitle('');
+    setDescription('');
+    setPriority(Priority.Medium);
+    setDeadline('');
+    setStartTime('');
+    setEndTime('');
+    setSelectedAssignee('');
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
-
-    // Convert local datetime to nanoseconds (ICP uses nanoseconds)
-    const deadlineMs = new Date(deadline).getTime();
-    const deadlineNs = BigInt(deadlineMs) * BigInt(1_000_000);
+    setConferenceTouched(true);
+    if (!title.trim() || !conference.trim()) return;
 
     try {
+      const deadlineBigInt = deadline
+        ? BigInt(new Date(deadline).getTime() * 1_000_000)
+        : null;
+
+      const startBigInt =
+        startTime && deadline
+          ? BigInt(new Date(`${deadline}T${startTime}`).getTime() * 1_000_000)
+          : null;
+
+      const endBigInt =
+        endTime && deadline
+          ? BigInt(new Date(`${deadline}T${endTime}`).getTime() * 1_000_000)
+          : null;
+
       await createTask.mutateAsync({
         title: title.trim(),
-        conferenceName: conferenceName.trim() || null,
         description: description.trim() || null,
-        assignedTo,
-        deadline: deadlineNs,
+        assignees: selectedAssignee && selectedAssignee !== 'unassigned' ? [selectedAssignee] : [],
+        deadline: deadlineBigInt,
+        startTime: startBigInt,
+        endTime: endBigInt,
         priority,
+        conference: conference.trim(),
       });
-      toast.success('Task created successfully!');
-      handleClose();
-    } catch (err) {
-      toast.error('Failed to create task. Please try again.');
+
+      toast.success('Task created successfully');
+      resetForm();
+      onClose();
+    } catch {
+      toast.error('Failed to create task');
     }
   };
 
-  const handleClose = () => {
-    setTitle('');
-    setConferenceName('');
-    setDescription('');
-    setAssignedTo('');
-    setDeadline('');
-    setPriority(Priority.Medium);
-    setErrors({});
-    onClose();
-  };
-
-  // Min datetime: now
-  const minDatetime = new Date().toISOString().slice(0, 16);
+  const showConferenceError = conferenceTouched && !conference.trim();
 
   return (
-    <Dialog open={open} onOpenChange={open => !open && handleClose()}>
-      <DialogContent className="sm:max-w-[500px] bg-card border-border/60">
+    <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
+      <DialogContent className="bg-card border-border max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-display text-lg">Create New Task</DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
-            Fill in the details below to assign a task to your team.
-          </DialogDescription>
+          <DialogTitle className="text-foreground text-lg font-bold">Create New Task</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-          {/* Title */}
-          <div className="space-y-1.5">
-            <Label htmlFor="task-title" className="text-sm font-medium">
-              Task Title <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="task-title"
-              placeholder="Enter task title..."
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              className={`bg-secondary/50 border-border/50 ${errors.title ? 'border-destructive' : ''}`}
+          {/* Conference */}
+          <div>
+            <label className="text-sm font-medium text-foreground mb-1.5 block">
+              Conference <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="text"
+              value={conference}
+              onChange={(e) => setConference(e.target.value)}
+              onBlur={() => setConferenceTouched(true)}
+              placeholder="Enter conference name..."
+              required
+              className={`w-full px-3 py-2.5 bg-muted border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all ${
+                showConferenceError ? 'border-red-500/60 focus:ring-red-500/30' : 'border-border focus:border-primary/50'
+              }`}
             />
-            {errors.title && <p className="text-xs text-destructive">{errors.title}</p>}
+            {showConferenceError && (
+              <p className="text-xs text-red-400 mt-1">Conference is required</p>
+            )}
           </div>
 
-          {/* Conference Name */}
-          <div className="space-y-1.5">
-            <Label htmlFor="task-conference" className="text-sm font-medium">
-              Conference Name <span className="text-muted-foreground text-xs">(optional)</span>
-            </Label>
-            <Input
-              id="task-conference"
-              placeholder="Enter conference name..."
-              value={conferenceName}
-              onChange={e => setConferenceName(e.target.value)}
-              className="bg-secondary/50 border-border/50"
+          {/* Title */}
+          <div>
+            <label className="text-sm font-medium text-foreground mb-1.5 block">
+              Task Title <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter task title..."
+              required
+              autoFocus
+              className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
             />
           </div>
 
           {/* Description */}
-          <div className="space-y-1.5">
-            <Label htmlFor="task-desc" className="text-sm font-medium">
-              Description <span className="text-muted-foreground text-xs">(optional)</span>
-            </Label>
-            <Textarea
-              id="task-desc"
-              placeholder="Add more details..."
+          <div>
+            <label className="text-sm font-medium text-foreground mb-1.5 block">
+              Description{' '}
+              <span className="text-muted-foreground text-xs font-normal">(optional)</span>
+            </label>
+            <textarea
               value={description}
-              onChange={e => setDescription(e.target.value)}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Add a description..."
               rows={3}
-              className="bg-secondary/50 border-border/50 resize-none text-sm"
+              className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all resize-none"
             />
-          </div>
-
-          {/* Assignee */}
-          <div className="space-y-1.5">
-            <Label className="text-sm font-medium">
-              Assign To <span className="text-destructive">*</span>
-            </Label>
-            <Select value={assignedTo} onValueChange={setAssignedTo}>
-              <SelectTrigger className={`bg-secondary/50 border-border/50 ${errors.assignedTo ? 'border-destructive' : ''}`}>
-                <SelectValue placeholder="Select team member..." />
-              </SelectTrigger>
-              <SelectContent>
-                {teamMembers.length === 0 ? (
-                  <SelectItem value="__none__" disabled>
-                    No team members yet
-                  </SelectItem>
-                ) : (
-                  teamMembers.map(member => (
-                    <SelectItem key={member} value={member}>
-                      {member}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-            {errors.assignedTo && <p className="text-xs text-destructive">{errors.assignedTo}</p>}
-          </div>
-
-          {/* Deadline */}
-          <div className="space-y-1.5">
-            <Label htmlFor="task-deadline" className="text-sm font-medium">
-              Deadline <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="task-deadline"
-              type="datetime-local"
-              value={deadline}
-              min={minDatetime}
-              onChange={e => setDeadline(e.target.value)}
-              className={`bg-secondary/50 border-border/50 ${errors.deadline ? 'border-destructive' : ''}`}
-            />
-            {errors.deadline && <p className="text-xs text-destructive">{errors.deadline}</p>}
           </div>
 
           {/* Priority */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Priority</Label>
-            <RadioGroup
-              value={priority}
-              onValueChange={val => setPriority(val as Priority)}
-              className="flex gap-4"
-            >
-              <div className="flex items-center gap-2">
-                <RadioGroupItem value={Priority.High} id="p-high" />
-                <Label htmlFor="p-high" className="text-sm cursor-pointer flex items-center gap-1">
-                  <span>🔴</span> High
-                </Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <RadioGroupItem value={Priority.Medium} id="p-medium" />
-                <Label htmlFor="p-medium" className="text-sm cursor-pointer flex items-center gap-1">
-                  <span>🟡</span> Medium
-                </Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <RadioGroupItem value={Priority.Low} id="p-low" />
-                <Label htmlFor="p-low" className="text-sm cursor-pointer flex items-center gap-1">
-                  <span>🟢</span> Low
-                </Label>
-              </div>
-            </RadioGroup>
+          <div>
+            <label className="text-sm font-medium text-foreground mb-1.5 block">Priority</label>
+            <div className="flex gap-2">
+              {priorityOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setPriority(opt.value)}
+                  className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-all flex items-center justify-center gap-1.5 ${
+                    priority === opt.value
+                      ? `${opt.bg} ${opt.color} border-current`
+                      : 'bg-muted border-border text-muted-foreground hover:border-border/80'
+                  }`}
+                >
+                  <span>{opt.emoji}</span>
+                  <span>{opt.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Deadline + Time Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">
+                Deadline Date{' '}
+                <span className="text-muted-foreground text-xs font-normal">(optional)</span>
+              </label>
+              <input
+                type="date"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">
+                Start Time{' '}
+                <span className="text-muted-foreground text-xs font-normal">(optional)</span>
+              </label>
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                disabled={!deadline}
+                className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">
+                End Time{' '}
+                <span className="text-muted-foreground text-xs font-normal">(optional)</span>
+              </label>
+              <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                disabled={!deadline}
+                className="w-full px-3 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
+          </div>
+          {!deadline && (startTime || endTime) && (
+            <p className="text-xs text-yellow-400 -mt-2">
+              Set a deadline date to enable time pickers
+            </p>
+          )}
+
+          {/* Assign To */}
+          <div>
+            <label className="text-sm font-medium text-foreground mb-1.5 block">
+              Assign To{' '}
+              <span className="text-muted-foreground text-xs font-normal">(optional)</span>
+            </label>
+            <Select value={selectedAssignee} onValueChange={setSelectedAssignee}>
+              <SelectTrigger className="w-full bg-muted border-border rounded-xl text-sm text-foreground focus:ring-primary/50">
+                <SelectValue placeholder="Select a team member..." />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border">
+                <SelectItem value="unassigned" className="text-muted-foreground">
+                  Unassigned
+                </SelectItem>
+                {memberNames.map((name) => (
+                  <SelectItem key={name} value={name} className="text-foreground">
+                    {name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="ghost" onClick={handleClose} disabled={createTask.isPending}>
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={handleClose}
+              className="flex-1 py-2.5 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-border/80 text-sm font-medium transition-all"
+            >
               Cancel
-            </Button>
-            <Button type="submit" disabled={createTask.isPending} className="min-w-[100px]">
-              {createTask.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Creating...
-                </>
-              ) : (
-                'Create Task'
-              )}
-            </Button>
+            </button>
+            <button
+              type="submit"
+              disabled={createTask.isPending || !title.trim() || !conference.trim()}
+              className="flex-1 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-glow-sm"
+            >
+              {createTask.isPending && <Loader2 size={14} className="animate-spin" />}
+              {createTask.isPending ? 'Creating...' : 'Create Task'}
+            </button>
           </div>
         </form>
       </DialogContent>

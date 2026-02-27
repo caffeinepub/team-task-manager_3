@@ -1,15 +1,21 @@
 import { type Task, Priority } from '../backend';
 
-const PRIORITY_ORDER: Record<string, number> = {
-  [Priority.High]: 0,
-  [Priority.Medium]: 1,
-  [Priority.Low]: 2,
-};
+function priorityOrder(p: Priority): number {
+  switch (p) {
+    case Priority.High: return 0;
+    case Priority.Medium: return 1;
+    case Priority.Low: return 2;
+  }
+}
 
-export function sortTasksByDeadlineAndPriority(tasks: Task[]): Task[] {
+export function sortTasks(tasks: Task[]): Task[] {
   return [...tasks].sort((a, b) => {
-    const deadlineDiff = Number(a.deadline) - Number(b.deadline);
+    // Tasks without deadlines go to the end
+    if (!a.deadline && !b.deadline) return priorityOrder(a.priority) - priorityOrder(b.priority);
+    if (!a.deadline) return 1;
+    if (!b.deadline) return -1;
+    const deadlineDiff = Number(a.deadline - b.deadline);
     if (deadlineDiff !== 0) return deadlineDiff;
-    return (PRIORITY_ORDER[a.priority] ?? 1) - (PRIORITY_ORDER[b.priority] ?? 1);
+    return priorityOrder(a.priority) - priorityOrder(b.priority);
   });
 }

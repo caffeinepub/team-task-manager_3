@@ -1,34 +1,34 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "App with team member management functionality. Fixing 'Add Team Member' modal to remove permission errors and allow any logged-in user to add team members, while keeping the form simple (Name, Email ID, Role fields).",
-  "architectural_notes": [
-    "Backend canister (nkwgw-dqaaa-aaaad-qiqha-cai) on Internet Computer - can enter stopped state after deployment, requiring redeploy to restart"
+  "summary": "Project management Kanban board app with task cards, status badges, column-based workflow (To Do/In Progress/Done), date filters, export functionality, and reminders panel.",
+  "architectural_notes": [],
+  "known_issues": [
+    "Reminders dropdown overlaps date filter buttons and Export button in top-right area",
+    "Color contrast issues: low contrast between text and background on cards, badges, and column headers (especially Done column with dark green bg)"
   ],
-  "known_issues": [],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-update-the-addusermodal-component-to-remove-any-frontend-side-permission-guard-or-error-display-the-you-do-not-have-permission-to-add-team-members-message-the-modal-should-show-only-the-clean-form-with-name-email-id-and-role-fields-plus-cancel-and-add-member-buttons",
-      "title": "Update the `AddUserModal` component to remove any frontend-side permission guard or error display (the 'You do not have permission to add team members' message). The modal should show only the clean form with Name, Email ID, and Role fields, plus Cancel and Add Member buttons.",
+      "id": "feature-reposition-the-reminders-dropdown-panel-so-it-does-not-overlap-the-export-button-or-the-date-filter-buttons-this-week-this-month-custom-the-panel-should-open-below-the-notification-bell-icon-without-covering-any-toolbar-elements-ensuring-proper-z-index-layering-and-positioning-so-all-toolbar-controls-remain-fully-visible-and-accessible-when-the-reminders-panel-is-open",
+      "title": "Reposition the Reminders dropdown panel so it does not overlap the Export button or the date filter buttons (This Week, This Month, Custom). The panel should open below the notification bell icon without covering any toolbar elements, ensuring proper z-index layering and positioning so all toolbar controls remain fully visible and accessible when the Reminders panel is open.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-color-contrast-issues-across-the-entire-application-specifically-1-the-done-column-header-currently-has-a-very-dark-green-background-ensure-the-header-text-and-icon-are-clearly-readable-against-it-2-task-cards-in-all-columns-must-have-sufficient-contrast-between-card-background-and-body-text-assignee-names-and-date-text-3-status-badge-text-to-do-in-progress-done-must-contrast-clearly-against-their-badge-background-colors-4-column-header-badges-task-count-circles-must-have-readable-text-on-their-background-5-all-body-text-throughout-the-app-must-meet-a-minimum-contrast-ratio-of-4-5-1-against-its-background-avoid-pairing-similarly-dark-or-similarly-light-colors-for-text-and-background",
+      "title": "Fix color contrast issues across the entire application. Specifically: (1) The 'Done' column header currently has a very dark green background — ensure the header text and icon are clearly readable against it. (2) Task cards in all columns must have sufficient contrast between card background and body text, assignee names, and date text. (3) Status badge text (To Do, In Progress, Done) must contrast clearly against their badge background colors. (4) Column header badges (task count circles) must have readable text on their background. (5) All body text throughout the app must meet a minimum contrast ratio of 4.5:1 against its background. Avoid pairing similarly dark or similarly light colors for text and background.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     }
   ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Remove the permission check that blocks non-admin users from adding team members in the backend. The `addTeamMember` function should allow any authenticated caller to add a team member without role-based restriction.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "status": "pending"
-    }
-  ],
+  "new_feature_requests": [],
   "gameProjectType": "none",
-  "projectName": "Fix Add Team Member modal — remove permission error and enable saving",
+  "projectName": "Fix Reminders panel overlap and color contrast issues",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

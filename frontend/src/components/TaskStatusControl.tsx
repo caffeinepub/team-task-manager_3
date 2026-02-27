@@ -1,73 +1,52 @@
-import { useState } from 'react';
+import { useUpdateTaskStatus } from '../hooks/useQueries';
+import { Task, TaskStatus } from '../backend';
 import { Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Status } from '../backend';
-import { useUpdateTaskStatus } from '../hooks/useQueries';
-import { toast } from 'sonner';
 
 interface TaskStatusControlProps {
-  taskId: bigint;
-  currentStatus: Status;
+  task: Task;
 }
 
-const STATUS_CONFIG: Record<Status, { label: string; classes: string }> = {
-  [Status.Pending]: { label: 'Pending', classes: 'text-muted-foreground' },
-  [Status.InProgress]: { label: 'In Progress', classes: 'text-blue-400' },
-  [Status.Completed]: { label: 'Completed', classes: 'text-green-400' },
-  [Status.CarryForward]: { label: 'Carry Forward', classes: 'text-purple-400' },
+const STATUS_OPTIONS = [
+  { value: TaskStatus.ToDo, label: 'To Do', color: 'text-blue-400' },
+  { value: TaskStatus.InProgress, label: 'In Progress', color: 'text-yellow-400' },
+  { value: TaskStatus.Done, label: 'Done', color: 'text-green-400' },
+];
+
+const STATUS_STYLES: Record<string, string> = {
+  [TaskStatus.ToDo]: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  [TaskStatus.InProgress]: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+  [TaskStatus.Done]: 'bg-green-500/10 text-green-400 border-green-500/20',
 };
 
-export default function TaskStatusControl({ taskId, currentStatus }: TaskStatusControlProps) {
-  const [isUpdating, setIsUpdating] = useState(false);
+export default function TaskStatusControl({ task }: TaskStatusControlProps) {
   const updateStatus = useUpdateTaskStatus();
+  const isPending = updateStatus.isPending;
 
-  const handleStatusChange = async (value: string) => {
-    const newStatus = value as Status;
-    if (newStatus === currentStatus) return;
-
-    setIsUpdating(true);
+  const handleChange = async (value: string) => {
     try {
-      await updateStatus.mutateAsync({ taskId, newStatus });
-      toast.success(`Status updated to ${STATUS_CONFIG[newStatus]?.label ?? newStatus}`);
+      await updateStatus.mutateAsync({
+        taskId: task.id,
+        newStatus: value as TaskStatus,
+      });
     } catch {
-      toast.error('Failed to update status');
-    } finally {
-      setIsUpdating(false);
+      // error handled by toast in parent or silently
     }
   };
 
   return (
-    <div className="relative flex items-center gap-1.5">
-      {isUpdating && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
-      <Select value={currentStatus} onValueChange={handleStatusChange} disabled={isUpdating}>
-        <SelectTrigger className="h-7 w-[140px] text-xs border-border/50 bg-secondary/50">
+    <div className="flex items-center gap-1.5">
+      {isPending && <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />}
+      <Select value={task.status as string} onValueChange={handleChange} disabled={isPending}>
+        <SelectTrigger className={`h-7 text-xs border rounded-full px-2.5 w-auto min-w-[90px] ${STATUS_STYLES[task.status as string] || ''}`}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={Status.Pending} className="text-xs">
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground inline-block" />
-              Pending
-            </span>
-          </SelectItem>
-          <SelectItem value={Status.InProgress} className="text-xs">
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-400 inline-block" />
-              In Progress
-            </span>
-          </SelectItem>
-          <SelectItem value={Status.Completed} className="text-xs">
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-green-400 inline-block" />
-              Completed
-            </span>
-          </SelectItem>
-          <SelectItem value={Status.CarryForward} className="text-xs">
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-purple-400 inline-block" />
-              Carry Forward
-            </span>
-          </SelectItem>
+          {STATUS_OPTIONS.map(opt => (
+            <SelectItem key={opt.value} value={opt.value} className={`text-xs ${opt.color}`}>
+              {opt.label}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </div>

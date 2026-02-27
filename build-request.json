@@ -1,54 +1,61 @@
 {
   "kind": "build_request",
-  "title": "Fix Add Team Member modal — remove permission error and enable saving",
+  "title": "Fix Reminders panel overlap and color contrast issues",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Remove the permission check that blocks non-admin users from adding team members in the backend. The `addTeamMember` function should allow any authenticated caller to add a team member without role-based restriction.",
-      "target": "backend",
+      "text": "Reposition the Reminders dropdown panel so it does not overlap the Export button or the date filter buttons (This Week, This Month, Custom). The panel should open below the notification bell icon without covering any toolbar elements, ensuring proper z-index layering and positioning so all toolbar controls remain fully visible and accessible when the Reminders panel is open.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-1",
+          "msg-2"
         ],
         "quotes": [
-          "Remove the permission error — fix the logic so logged-in users can add team members without hitting this restriction"
+          "Reminders is merging please look into the image and rectify",
+          "the Reminders dropdown is covering the Export button and date filter buttons (This Week, This Month, Custom) in the top-right area"
         ]
       },
       "acceptanceCriteria": [
-        "Calling `addTeamMember` no longer returns a permission error for any authenticated user",
-        "Team members are successfully saved to the backend state"
+        "The Reminders dropdown panel does not overlap the Export button when open",
+        "The Reminders dropdown panel does not overlap the This Week, This Month, and Custom date filter buttons when open",
+        "The Reminders panel is positioned so it opens fully visible without clipping other toolbar elements",
+        "All toolbar controls (Export, date filters) remain clickable when Reminders panel is open"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Update the `AddUserModal` component to remove any frontend-side permission guard or error display (the 'You do not have permission to add team members' message). The modal should show only the clean form with Name, Email ID, and Role fields, plus Cancel and Add Member buttons.",
+      "text": "Fix color contrast issues across the entire application. Specifically: (1) The 'Done' column header currently has a very dark green background — ensure the header text and icon are clearly readable against it. (2) Task cards in all columns must have sufficient contrast between card background and body text, assignee names, and date text. (3) Status badge text (To Do, In Progress, Done) must contrast clearly against their badge background colors. (4) Column header badges (task count circles) must have readable text on their background. (5) All body text throughout the app must meet a minimum contrast ratio of 4.5:1 against its background. Avoid pairing similarly dark or similarly light colors for text and background.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-1",
+          "msg-2"
         ],
         "quotes": [
-          "Remove the permission error",
-          "Keep the form simple — Name, Email ID, and Role fields"
+          "color formating of font and bg should be contrast not the same",
+          "the 'Done' column has a dark green background with low-contrast text, and several other elements (cards, badges, headers) need better contrast"
         ]
       },
       "acceptanceCriteria": [
-        "No permission error banner appears in the Add Team Member modal",
-        "Modal displays Name, Email ID, and Role fields only",
-        "Cancel and Add Member buttons are present and functional",
-        "Submitting the form calls the backend and saves the new team member"
+        "The Done column header text and icon are clearly legible against the dark green background",
+        "Task card body text (title, description, assignee, date) has strong contrast against the card background in all columns",
+        "Status badge labels (To Do, In Progress, Done) are clearly readable — text color contrasts sufficiently with badge background",
+        "Column count badges show readable numerals against their background",
+        "No text-on-background pairing in the app uses the same or near-identical hue/lightness for both",
+        "Contrast ratio for all body text meets at least 4.5:1 against its direct background"
       ]
     }
   ],
   "constraints": [
-    "Do not change the form fields — Name, Email ID, and Role must remain as-is",
-    "Do not modify any files in frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui"
+    "Do not change the backend schema or any backend logic",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui"
   ],
   "nonGoals": [
-    "Redesigning the modal UI beyond removing the permission error",
-    "Adding new form fields or validation rules",
-    "Changing role options in the dropdown"
+    "Adding new features or pages",
+    "Changing the overall dark theme of the application",
+    "Modifying backend task data or status logic"
   ],
   "imageRequirements": {
     "required": [],

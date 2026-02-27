@@ -1,169 +1,201 @@
-import { useState } from 'react';
-import { Trash2, ChevronDown, ChevronUp, Edit2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import PriorityBadge from './PriorityBadge';
-import TaskStatusControl from './TaskStatusControl';
-import { getUrgencyLevel, getCardClasses, getUrgencyBadgeClasses, getUrgencyLabel } from '../utils/taskUrgency';
-import { Status, type Task } from '../backend';
+import React, { useState } from 'react';
+import { Calendar, Clock, Edit, ChevronDown, Building2 } from 'lucide-react';
+import { Task, TaskStatus, Priority, TeamMember } from '../backend';
+import StatusBadgeDropdown from './StatusBadgeDropdown';
+import EditTaskModal from './EditTaskModal';
 
 interface TaskCardProps {
   task: Task;
-  showAssignee?: boolean;
-  onDelete?: (taskId: bigint) => void;
-  onEdit?: (task: Task) => void;
+  members: TeamMember[];
+  isAdmin: boolean;
 }
 
-function formatDeadline(deadline: bigint): string {
-  const ms = Number(deadline) / 1_000_000;
-  return new Date(ms).toLocaleString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  });
+function getInitials(name: string): string {
+  return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
 }
 
-function formatCreatedAt(createdAt: bigint): string {
-  if (!createdAt || createdAt === BigInt(0)) return '';
-  const ms = Number(createdAt) / 1_000_000;
-  return new Date(ms).toLocaleDateString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
+function formatDate(deadline: bigint | undefined): string {
+  if (!deadline) return 'No deadline';
+  const date = new Date(Number(deadline) / 1_000_000);
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-export default function TaskCard({ task, showAssignee = true, onDelete, onEdit }: TaskCardProps) {
-  const [showDescription, setShowDescription] = useState(false);
+function formatTime(time: bigint | undefined): string {
+  if (!time || time === 0n) return '';
+  const date = new Date(Number(time) / 1_000_000);
+  return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+}
 
-  const urgency = getUrgencyLevel(task);
-  const cardClasses = getCardClasses(urgency);
-  const urgencyBadgeClasses = getUrgencyBadgeClasses(urgency);
-  const urgencyLabel = getUrgencyLabel(urgency);
+function isOverdue(deadline: bigint | undefined, status: TaskStatus): boolean {
+  if (!deadline) return false;
+  return status !== TaskStatus.Done && Number(deadline) < Date.now() * 1_000_000;
+}
 
-  const isCarryForward = task.status === Status.CarryForward;
-  const isCompleted = task.status === Status.Completed;
-  const createdAtStr = formatCreatedAt(task.createdAt);
+function getPriorityConfig(priority: Priority) {
+  switch (priority) {
+    case Priority.High:
+      return { label: '🔴 High', className: 'bg-red-600/25 text-red-200 border border-red-500/40' };
+    case Priority.Medium:
+      return { label: '🟡 Medium', className: 'bg-yellow-600/25 text-yellow-200 border border-yellow-500/40' };
+    case Priority.Low:
+      return { label: '🟢 Low', className: 'bg-emerald-600/25 text-emerald-200 border border-emerald-500/40' };
+  }
+}
+
+export default function TaskCard({ task, members, isAdmin }: TaskCardProps) {
+  const [editOpen, setEditOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  const overdue = isOverdue(task.deadline, task.status);
+  const priorityConfig = getPriorityConfig(task.priority);
+
+  // task.assignees is string[] of names — display them directly
+  const assigneeNames = task.assignees;
+
+  const startTimeStr = formatTime(task.startTime);
+  const endTimeStr = formatTime(task.endTime);
 
   return (
-    <div className={`rounded-xl border p-4 transition-all duration-200 hover:shadow-sm animate-fade-in ${
-      isCarryForward
-        ? 'border-carry-forward/40 bg-carry-forward/5'
-        : cardClasses
-    }`}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h3 className={`font-semibold text-sm leading-snug truncate ${
-              isCompleted ? 'line-through text-muted-foreground' : 'text-foreground'
-            }`}>
+    <>
+      <div
+        className={`bg-card border rounded-2xl p-4 card-elevated hover:card-hover transition-all duration-200 ${
+          overdue ? 'border-red-500/50' : 'border-border'
+        }`}
+      >
+        {/* Conference badge */}
+        {task.conference && task.conference.trim() !== '' && (
+          <div className="flex items-center gap-1.5 mb-2">
+            <Building2 size={11} className="text-primary/80 flex-shrink-0" />
+            <span className="text-xs text-primary font-medium truncate">{task.conference}</span>
+          </div>
+        )}
+
+        {/* Header */}
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div className="flex-1 min-w-0">
+            <h3
+              className={`font-semibold text-sm leading-snug ${
+                task.status === TaskStatus.Done
+                  ? 'line-through text-slate-400'
+                  : 'text-foreground'
+              }`}
+            >
               {task.title}
             </h3>
-            <PriorityBadge priority={task.priority} />
-            {isCarryForward ? (
-              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-carry-forward/20 text-carry-forward border border-carry-forward/30">
-                Carry Forward
+          </div>
+          <span
+            className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${priorityConfig.className}`}
+          >
+            {priorityConfig.label}
+          </span>
+        </div>
+
+        {/* Description (expandable) */}
+        {task.description && (
+          <div className="mb-3">
+            <p
+              className={`text-xs text-slate-300 leading-relaxed ${!expanded ? 'line-clamp-2' : ''}`}
+            >
+              {task.description}
+            </p>
+            {task.description.length > 80 && (
+              <button
+                onClick={() => setExpanded(!expanded)}
+                className="text-xs text-primary hover:text-primary/80 mt-1 flex items-center gap-0.5 transition-colors"
+              >
+                {expanded ? 'Less' : 'More'}
+                <ChevronDown
+                  size={12}
+                  className={`transition-transform ${expanded ? 'rotate-180' : ''}`}
+                />
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Assignees */}
+        {assigneeNames.length > 0 && (
+          <div className="flex items-center gap-1 mb-3">
+            <div className="flex -space-x-1.5">
+              {assigneeNames.slice(0, 3).map((name) => (
+                <div
+                  key={name}
+                  className="w-6 h-6 rounded-full bg-primary/30 border-2 border-card flex items-center justify-center"
+                  title={name}
+                >
+                  <span className="text-primary-foreground text-[9px] font-bold">
+                    {getInitials(name)}
+                  </span>
+                </div>
+              ))}
+              {assigneeNames.length > 3 && (
+                <div className="w-6 h-6 rounded-full bg-muted border-2 border-card flex items-center justify-center">
+                  <span className="text-foreground text-[9px] font-bold">
+                    +{assigneeNames.length - 3}
+                  </span>
+                </div>
+              )}
+            </div>
+            <span className="text-xs text-slate-300 ml-1">
+              {assigneeNames.length === 1 ? assigneeNames[0] : `${assigneeNames.length} members`}
+            </span>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/60">
+          <div className="flex items-center gap-3 text-xs">
+            {task.deadline && (
+              <span
+                className={`flex items-center gap-1 ${
+                  overdue ? 'text-red-400 font-medium' : 'text-slate-300'
+                }`}
+              >
+                <Calendar size={11} />
+                {formatDate(task.deadline)}
               </span>
-            ) : (
-              <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${urgencyBadgeClasses}`}>
-                {urgencyLabel}
+            )}
+            {startTimeStr && endTimeStr && (
+              <span className="flex items-center gap-1 text-slate-300">
+                <Clock size={11} />
+                {startTimeStr}–{endTimeStr}
+              </span>
+            )}
+            {startTimeStr && !endTimeStr && (
+              <span className="flex items-center gap-1 text-slate-300">
+                <Clock size={11} />
+                {startTimeStr}
               </span>
             )}
           </div>
 
-          {task.conferenceName && (
-            <p className="text-xs text-muted-foreground mt-1">
-              📅 {task.conferenceName}
-            </p>
-          )}
-
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-muted-foreground">
-            {showAssignee && <span>👤 {task.assignedTo}</span>}
-            <span>⏰ {formatDeadline(task.deadline)}</span>
-            {createdAtStr && <span>📌 Created {createdAtStr}</span>}
+          <div className="flex items-center gap-1.5">
+            {/* Clickable status badge dropdown — available to all users */}
+            <StatusBadgeDropdown
+              taskId={task.id}
+              currentStatus={task.status}
+              taskTitle={task.title}
+            />
+            {/* Edit button — admin only */}
+            {isAdmin && (
+              <button
+                onClick={() => setEditOpen(true)}
+                className="w-7 h-7 rounded-lg bg-muted hover:bg-primary/20 hover:text-primary text-slate-300 flex items-center justify-center transition-all duration-200"
+                title="Edit task"
+              >
+                <Edit size={13} />
+              </button>
+            )}
           </div>
         </div>
-
-        <div className="flex items-center gap-1 shrink-0">
-          {task.description && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => setShowDescription(v => !v)}
-            >
-              {showDescription ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-            </Button>
-          )}
-
-          {onEdit && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-blue-500 hover:text-blue-600"
-              onClick={() => onEdit(task)}
-              title="Edit task"
-            >
-              <Edit2 size={14} />
-            </Button>
-          )}
-
-          {onDelete && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-destructive hover:text-destructive"
-                  title="Delete task"
-                >
-                  <Trash2 size={14} />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Task?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to delete "{task.title}"? This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    onClick={() => onDelete(task.id)}
-                  >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
-        </div>
       </div>
 
-      {showDescription && task.description && (
-        <div className="mt-3 pt-3 border-t border-border/50">
-          <p className="text-sm text-muted-foreground">{task.description}</p>
-        </div>
-      )}
-
-      <div className="mt-3 pt-3 border-t border-border/50">
-        <TaskStatusControl taskId={task.id} currentStatus={task.status} />
-      </div>
-    </div>
+      <EditTaskModal
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        task={task}
+        members={members}
+      />
+    </>
   );
 }

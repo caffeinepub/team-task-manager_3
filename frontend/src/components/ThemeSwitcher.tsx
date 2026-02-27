@@ -1,44 +1,41 @@
-import { Sun, Moon, Contrast } from 'lucide-react';
-import { useTheme, type AppTheme } from '@/hooks/useTheme';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-
-const themes: { value: AppTheme; label: string; icon: React.ElementType }[] = [
-  { value: 'light', label: 'Daylight', icon: Sun },
-  { value: 'normal', label: 'Normal', icon: Contrast },
-  { value: 'dark', label: 'Dark', icon: Moon },
-];
+import { Sun, Moon } from 'lucide-react';
+import { useTheme } from '../hooks/useTheme';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 
 export default function ThemeSwitcher() {
-  const { theme, setTheme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
+
+  const isDark = theme === 'dark';
 
   return (
-    <TooltipProvider delayDuration={300}>
-      <div className="flex items-center gap-0.5 rounded-lg border border-border/50 bg-secondary/40 p-0.5">
-        {themes.map(({ value, label, icon: Icon }) => {
-          const isActive = theme === value;
-          return (
-            <Tooltip key={value}>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => setTheme(value)}
-                  aria-label={label}
-                  aria-pressed={isActive}
-                  className={`flex items-center justify-center w-7 h-7 rounded-md transition-all duration-150 ${
-                    isActive
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
-                {label}
-              </TooltipContent>
-            </Tooltip>
-          );
-        })}
-      </div>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={toggleTheme}
+            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            className="relative w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-muted/50 hover:bg-muted transition-all duration-200 text-muted-foreground hover:text-foreground"
+          >
+            <span
+              className={`absolute transition-all duration-300 ${
+                isDark ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-75 rotate-90'
+              }`}
+            >
+              <Moon size={16} />
+            </span>
+            <span
+              className={`absolute transition-all duration-300 ${
+                !isDark ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-75 -rotate-90'
+              }`}
+            >
+              <Sun size={16} />
+            </span>
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          {isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        </TooltipContent>
+      </Tooltip>
     </TooltipProvider>
   );
 }

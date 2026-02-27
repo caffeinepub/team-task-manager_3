@@ -1,64 +1,79 @@
+import React from 'react';
 import { Search, X } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { type TaskFiltersState } from '../hooks/useTaskFilters';
+import { TeamMember } from '../backend';
+
+const PREDEFINED_MEMBERS = [
+  'Gurudas',
+  'James',
+  'Jesin',
+  'Pavithra',
+  'Pramila',
+  'Sampath',
+  'Seshadri Pa',
+  'Shabeena',
+  'Shashank',
+  'Vinay',
+  'Veidhehi',
+];
 
 interface TaskFiltersProps {
-  filters: TaskFiltersState;
-  teamMembers: string[];
-  onChange: (filters: TaskFiltersState) => void;
+  filters: { search: string; assigneeId: string };
+  onFiltersChange: (filters: { search: string; assigneeId: string }) => void;
+  members: TeamMember[];
 }
 
-export default function TaskFilters({ filters, teamMembers, onChange }: TaskFiltersProps) {
-  const hasActiveFilters = filters.searchText.trim() || filters.selectedAssignee;
+export default function TaskFilters({ filters, onFiltersChange, members }: TaskFiltersProps) {
+  const hasFilters = filters.search || filters.assigneeId;
 
-  const clearFilters = () => {
-    onChange({ searchText: '', selectedAssignee: '' });
-  };
+  const memberNames: string[] =
+    members.length > 0
+      ? members.map((m) => m.name)
+      : PREDEFINED_MEMBERS;
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-col sm:flex-row gap-3">
       {/* Search */}
-      <div className="relative flex-1 min-w-[180px]">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
-        <Input
+      <div className="relative flex-1">
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <input
+          type="text"
           placeholder="Search tasks..."
-          value={filters.searchText}
-          onChange={e => onChange({ ...filters, searchText: e.target.value })}
-          className="pl-8 h-9 text-sm bg-secondary/50 border-border/50"
+          value={filters.search}
+          onChange={(e) => onFiltersChange({ ...filters, search: e.target.value })}
+          className="w-full pl-9 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
         />
       </div>
 
-      {/* Assignee filter */}
-      <Select
-        value={filters.selectedAssignee || '__all__'}
-        onValueChange={val => onChange({ ...filters, selectedAssignee: val === '__all__' ? '' : val })}
-      >
-        <SelectTrigger className="h-9 w-[160px] text-sm bg-secondary/50 border-border/50">
-          <SelectValue placeholder="All members" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="__all__">All members</SelectItem>
-          {teamMembers.map(member => (
-            <SelectItem key={member} value={member}>
-              {member}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      {/* Clear */}
-      {hasActiveFilters && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={clearFilters}
-          className="h-9 px-2 text-muted-foreground hover:text-foreground"
+      {/* Assignee Filter */}
+      <div className="relative">
+        <select
+          value={filters.assigneeId}
+          onChange={(e) => onFiltersChange({ ...filters, assigneeId: e.target.value })}
+          className="appearance-none pl-3 pr-8 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all min-w-[160px]"
         >
-          <X className="h-3.5 w-3.5 mr-1" />
+          <option value="">All Members</option>
+          {memberNames.map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </select>
+        <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      {/* Clear Filters */}
+      {hasFilters && (
+        <button
+          onClick={() => onFiltersChange({ search: '', assigneeId: '' })}
+          className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-border/80 text-sm transition-all"
+        >
+          <X size={14} />
           Clear
-        </Button>
+        </button>
       )}
     </div>
   );

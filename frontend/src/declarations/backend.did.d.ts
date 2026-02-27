@@ -10,97 +10,78 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export interface ActivityEntry {
-  'id' : bigint,
-  'actorName' : string,
-  'actionType' : { 'Login' : null } |
-    { 'StatusChanged' : null } |
-    { 'TaskEdited' : null } |
-    { 'TaskCreated' : null } |
-    { 'TaskDeleted' : null },
-  'taskTitle' : string,
-  'description' : string,
-  'taskId' : bigint,
-  'timestamp' : bigint,
-  'actorEmail' : string,
-}
 export type Priority = { 'Low' : null } |
   { 'High' : null } |
   { 'Medium' : null };
-export type Role = { 'Admin' : null } |
-  { 'TeamMember' : null };
-export type Status = { 'CarryForward' : null } |
-  { 'InProgress' : null } |
-  { 'Completed' : null } |
-  { 'Pending' : null };
 export interface Task {
   'id' : bigint,
-  'status' : Status,
+  'startTime' : [] | [bigint],
+  'status' : TaskStatus,
   'title' : string,
-  'assignedTo' : string,
+  'endTime' : [] | [bigint],
+  'conference' : string,
   'createdAt' : bigint,
-  'conferenceName' : [] | [string],
+  'createdBy' : Principal,
   'description' : [] | [string],
-  'deadline' : bigint,
+  'deadline' : [] | [bigint],
   'priority' : Priority,
+  'assignees' : Array<string>,
 }
-export interface TeamMember { 'name' : string, 'role' : Role, 'email' : string }
-export interface User {
+export type TaskStatus = { 'Done' : null } |
+  { 'ToDo' : null } |
+  { 'InProgress' : null };
+export interface TeamMember {
   'id' : bigint,
   'name' : string,
-  'createdAt' : bigint,
-  'role' : Role,
-  'email' : string,
-  'passwordHash' : string,
+  'claimedBy' : [] | [Principal],
 }
-export interface UserProfile {
-  'name' : string,
-  'role' : Role,
-  'email' : string,
-}
+export interface UserProfile { 'name' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
-  'addTeamMember' : ActorMethod<[string, string, Role], undefined>,
-  'addUser' : ActorMethod<[string, string, string, Role], User>,
+  'addTeamMember' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
-  'assignUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'claimTeamMember' : ActorMethod<[bigint], undefined>,
   'createTask' : ActorMethod<
-    [string, [] | [string], [] | [string], string, bigint, Priority],
+    [
+      string,
+      [] | [string],
+      Array<string>,
+      [] | [bigint],
+      [] | [bigint],
+      [] | [bigint],
+      Priority,
+      string,
+    ],
     Task
   >,
   'deleteTask' : ActorMethod<[bigint], undefined>,
-  'deleteUser' : ActorMethod<[string], undefined>,
-  'editTask' : ActorMethod<
-    [bigint, string, [] | [string], string, bigint, Priority, [] | [string]],
-    Task
-  >,
-  'getActivityLogsByDateRange' : ActorMethod<
-    [bigint, bigint],
-    Array<ActivityEntry>
-  >,
-  'getActivityLogsByTask' : ActorMethod<[bigint], Array<ActivityEntry>>,
-  'getActivityLogsByUser' : ActorMethod<[string], Array<ActivityEntry>>,
-  'getAllActivityLogs' : ActorMethod<[], Array<ActivityEntry>>,
-  'getAllTasks' : ActorMethod<[], Array<Task>>,
-  'getAllUsers' : ActorMethod<[], Array<User>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
-  'getRecentLoginEvents' : ActorMethod<[bigint, bigint], Array<ActivityEntry>>,
+  'getTasks' : ActorMethod<[], Array<Task>>,
   'getTasksByAssignee' : ActorMethod<[string], Array<Task>>,
-  'getTeamMembers' : ActorMethod<[], Array<TeamMember>>,
-  'getUserByEmail' : ActorMethod<[string], [] | [User]>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
-  'loginUser' : ActorMethod<[string, string], User>,
-  'registerUser' : ActorMethod<[string, string, string], User>,
-  'removeTeamMember' : ActorMethod<[string], undefined>,
-  'requestPasswordReset' : ActorMethod<[string], string>,
-  'resetPassword' : ActorMethod<[string, string], undefined>,
+  'listTeamMembers' : ActorMethod<[], Array<TeamMember>>,
+  'removeTeamMember' : ActorMethod<[bigint], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
-  'updateTaskStatus' : ActorMethod<[bigint, Status], undefined>,
+  'updateTask' : ActorMethod<
+    [
+      bigint,
+      string,
+      [] | [string],
+      Array<string>,
+      [] | [bigint],
+      [] | [bigint],
+      [] | [bigint],
+      Priority,
+      string,
+    ],
+    undefined
+  >,
+  'updateTaskStatus' : ActorMethod<[bigint, TaskStatus], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

@@ -1,191 +1,134 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Bell, X, Clock, CheckCircle, AlertTriangle, LogIn } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { useGetRecentLoginEvents } from '../hooks/useQueries';
+import { useState, useRef, useEffect } from 'react';
+import { Bell, X } from 'lucide-react';
+import { useGetTasks } from '../hooks/useQueries';
 import { useTaskReminders } from '../hooks/useTaskReminders';
-import { Variant_Login_StatusChanged_TaskEdited_TaskCreated_TaskDeleted } from '../backend';
+import { type Task } from '../backend';
 
-function formatTimestamp(ts: bigint): string {
-  const ms = Number(ts / 1_000_000n);
-  const date = new Date(ms);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60_000);
-  const diffHours = Math.floor(diffMs / 3_600_000);
-  const diffDays = Math.floor(diffMs / 86_400_000);
+const NS_PER_MS = 1_000_000n;
 
-  if (diffMins < 1) return 'just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString();
+function formatDeadline(deadline: bigint | undefined): string {
+  if (!deadline) return 'No deadline';
+  return new Date(Number(deadline / NS_PER_MS)).toLocaleString();
 }
 
-// Show login events from the last 24 hours
-const now = BigInt(Date.now()) * 1_000_000n;
-const oneDayAgo = now - BigInt(24 * 60 * 60 * 1_000_000_000);
+function ReminderItem({
+  task,
+  type,
+}: {
+  task: Task;
+  type: 'overdue' | 'critical' | 'warning';
+}) {
+  const colors = {
+    overdue: 'border-l-red-500 bg-red-500/10',
+    critical: 'border-l-orange-500 bg-orange-500/10',
+    warning: 'border-l-yellow-500 bg-yellow-500/10',
+  };
+  const labels = {
+    overdue: '🔴 Overdue',
+    critical: '🟠 Due in <1hr',
+    warning: '🟡 Due in <24hrs',
+  };
+  const textColors = {
+    overdue: 'text-red-300',
+    critical: 'text-orange-300',
+    warning: 'text-yellow-300',
+  };
+
+  const assigneeDisplay = task.assignees.length > 0 ? task.assignees.join(', ') : '';
+
+  return (
+    <div className={`border-l-2 pl-3 py-2 rounded-r-lg ${colors[type]}`}>
+      <p className="text-xs font-semibold text-white truncate">{task.title}</p>
+      {assigneeDisplay && <p className="text-xs text-slate-300">{assigneeDisplay}</p>}
+      <p className="text-xs text-slate-400">{formatDeadline(task.deadline)}</p>
+      <span className={`text-xs font-medium ${textColors[type]}`}>{labels[type]}</span>
+    </div>
+  );
+}
 
 export default function NotificationBell() {
   const [open, setOpen] = useState(false);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const { isAdmin } = useAuth();
-
-  // useTaskReminders fetches tasks internally — no argument needed
-  const reminders = useTaskReminders();
-
-  // Fetch login events from the last 24 hours; only meaningful for admins
-  const fromTime = BigInt(Date.now() - 24 * 60 * 60 * 1000) * 1_000_000n;
-  const toTime = BigInt(Date.now()) * 1_000_000n;
-  const { data: loginEvents = [] } = useGetRecentLoginEvents(fromTime, toTime);
-
-  const sortedLoginEvents = [...loginEvents]
-    .filter(e => e.actionType === Variant_Login_StatusChanged_TaskEdited_TaskCreated_TaskDeleted.Login)
-    .sort((a, b) => Number(b.timestamp - a.timestamp))
-    .slice(0, 10);
+  const ref = useRef<HTMLDivElement>(null);
+  const { data: tasks = [] } = useGetTasks();
+  const reminders = useTaskReminders(tasks);
 
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
       }
     }
-    if (open) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [open]);
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
-  const loginCount = isAdmin ? sortedLoginEvents.length : 0;
-  const totalCount = reminders.totalCount + loginCount;
+  const hasReminders = reminders.totalCount > 0;
 
   return (
-    <div className="relative" ref={panelRef}>
+    <div className="relative" ref={ref}>
       <button
-        onClick={() => setOpen(!open)}
-        className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+        onClick={() => setOpen(o => !o)}
+        className="relative p-2 rounded-xl hover:bg-muted transition-colors"
         aria-label="Notifications"
       >
-        <Bell className="h-5 w-5" />
-        {totalCount > 0 && (
-          <span className="absolute top-1 right-1 h-4 w-4 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center font-bold">
-            {totalCount > 9 ? '9+' : totalCount}
+        <Bell size={20} className={hasReminders ? 'text-primary' : 'text-muted-foreground'} />
+        {hasReminders && (
+          <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+            {reminders.totalCount > 9 ? '9+' : reminders.totalCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-            <h3 className="font-semibold text-foreground">Notifications</h3>
+        <div
+          className="fixed z-[200] w-72 rounded-2xl shadow-2xl overflow-hidden border border-border"
+          style={{
+            top: (() => {
+              const el = ref.current;
+              if (!el) return 60;
+              const rect = el.getBoundingClientRect();
+              return rect.bottom + 8;
+            })(),
+            right: (() => {
+              const el = ref.current;
+              if (!el) return 16;
+              return window.innerWidth - el.getBoundingClientRect().right;
+            })(),
+            background: 'oklch(0.19 0.04 285)',
+          }}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card">
+            <div>
+              <h3 className="font-semibold text-sm text-foreground">Reminders</h3>
+              <p className="text-xs text-muted-foreground">{reminders.totalCount} active alerts</p>
+            </div>
             <button
               onClick={() => setOpen(false)}
-              className="text-muted-foreground hover:text-foreground"
+              className="p-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
             >
-              <X className="h-4 w-4" />
+              <X size={14} />
             </button>
           </div>
 
-          <div className="max-h-96 overflow-y-auto">
-            {/* Overdue tasks */}
-            {reminders.overdue.length > 0 && (
-              <div className="px-4 py-2">
-                <p className="text-xs font-semibold text-destructive uppercase tracking-wide mb-2">
-                  Overdue
-                </p>
-                {reminders.overdue.map((task) => (
-                  <div key={task.id.toString()} className="flex items-start gap-2 py-2 border-b border-border/50 last:border-0">
-                    <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{task.title}</p>
-                      <p className="text-xs text-muted-foreground">Assigned to {task.assignedTo}</p>
-                    </div>
-                  </div>
+          <div className="max-h-72 overflow-y-auto p-3 space-y-2">
+            {reminders.totalCount === 0 ? (
+              <div className="text-center py-6">
+                <Bell size={24} className="mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">No reminders right now</p>
+              </div>
+            ) : (
+              <>
+                {reminders.overdue.map(t => (
+                  <ReminderItem key={t.id.toString()} task={t} type="overdue" />
                 ))}
-              </div>
-            )}
-
-            {/* Due in 1 hour */}
-            {reminders.dueInOneHour.length > 0 && (
-              <div className="px-4 py-2">
-                <p className="text-xs font-semibold text-warning uppercase tracking-wide mb-2">
-                  Due in 1 Hour
-                </p>
-                {reminders.dueInOneHour.map((task) => (
-                  <div key={task.id.toString()} className="flex items-start gap-2 py-2 border-b border-border/50 last:border-0">
-                    <Clock className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{task.title}</p>
-                      <p className="text-xs text-muted-foreground">Assigned to {task.assignedTo}</p>
-                    </div>
-                  </div>
+                {reminders.dueInOneHour.map(t => (
+                  <ReminderItem key={t.id.toString()} task={t} type="critical" />
                 ))}
-              </div>
-            )}
-
-            {/* Due in 24 hours */}
-            {reminders.dueInTwentyFourHours.length > 0 && (
-              <div className="px-4 py-2">
-                <p className="text-xs font-semibold text-yellow-600 dark:text-yellow-400 uppercase tracking-wide mb-2">
-                  Due in 24 Hours
-                </p>
-                {reminders.dueInTwentyFourHours.map((task) => (
-                  <div key={task.id.toString()} className="flex items-start gap-2 py-2 border-b border-border/50 last:border-0">
-                    <Clock className="h-4 w-4 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" />
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{task.title}</p>
-                      <p className="text-xs text-muted-foreground">Assigned to {task.assignedTo}</p>
-                    </div>
-                  </div>
+                {reminders.dueInTwentyFourHours.map(t => (
+                  <ReminderItem key={t.id.toString()} task={t} type="warning" />
                 ))}
-              </div>
-            )}
-
-            {/* Carry forward tasks */}
-            {reminders.carryForward.length > 0 && (
-              <div className="px-4 py-2">
-                <p className="text-xs font-semibold text-carry-forward uppercase tracking-wide mb-2">
-                  Carry Forward
-                </p>
-                {reminders.carryForward.map((task) => (
-                  <div key={task.id.toString()} className="flex items-start gap-2 py-2 border-b border-border/50 last:border-0">
-                    <Clock className="h-4 w-4 text-carry-forward shrink-0 mt-0.5" />
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{task.title}</p>
-                      <p className="text-xs text-muted-foreground">Assigned to {task.assignedTo}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Recent Logins — Admin Only */}
-            {isAdmin && sortedLoginEvents.length > 0 && (
-              <div className="px-4 py-2">
-                <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-2">
-                  Recent Logins
-                </p>
-                {sortedLoginEvents.map((event) => (
-                  <div key={event.id.toString()} className="flex items-start gap-2 py-2 border-b border-border/50 last:border-0">
-                    <LogIn className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-foreground truncate">{event.actorName}</p>
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-xs text-muted-foreground truncate">{event.actorEmail}</p>
-                        <p className="text-xs text-muted-foreground shrink-0">{formatTimestamp(event.timestamp)}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Empty state */}
-            {totalCount === 0 && (
-              <div className="px-4 py-8 text-center">
-                <CheckCircle className="h-8 w-8 text-success mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">All caught up!</p>
-                <p className="text-xs text-muted-foreground mt-1">No pending notifications</p>
-              </div>
+              </>
             )}
           </div>
         </div>

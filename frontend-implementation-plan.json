@@ -1,22 +1,61 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix Add Team Member modal — remove permission error and enable saving",
+  "title": "Fix Reminders panel overlap and color contrast issues",
   "requirements": [
     {
-      "id": "REQ-2",
-      "summary": "Remove the permission error banner and frontend-side permission guard from the AddUserModal component to enable authenticated users to add team members",
+      "id": "REQ-1",
+      "summary": "Reposition Reminders dropdown panel to prevent overlap with toolbar controls",
       "acceptanceCriteria": [
-        "No permission error banner appears in the Add Team Member modal",
-        "Modal displays Name, Email ID, and Role fields only",
-        "Cancel and Add Member buttons are present and functional",
-        "Submitting the form calls the backend and saves the new team member"
+        "The Reminders dropdown panel does not overlap the Export button when open",
+        "The Reminders dropdown panel does not overlap the This Week, This Month, and Custom date filter buttons when open",
+        "The Reminders panel is positioned so it opens fully visible without clipping other toolbar elements",
+        "All toolbar controls (Export, date filters) remain clickable when Reminders panel is open"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/AddUserModal.tsx",
+          "path": "frontend/src/components/NotificationBell.tsx",
           "operation": "modify",
-          "description": "Remove any permission check logic or error state that displays 'You do not have permission to add team members'. Ensure the modal renders only the clean form with Name, Email ID, and Role fields, plus Cancel and Add Member buttons. The submit handler should call the addTeamMember mutation without any frontend-side authorization guard. Verify that the form remains functional and calls the backend to save the new team member on submission."
+          "description": "Fix the positioning of the reminders dropdown panel by adjusting the positioning classes from 'right-0' to 'right-0 top-full' to ensure it opens below the bell icon without overlapping toolbar elements. Update the z-index to ensure proper layering above content but below any modal overlays. Adjust the panel width and max-width if needed to prevent it from extending too far right and overlapping adjacent buttons. Consider adding negative left offset or adjusting right positioning to account for the panel's width relative to the bell icon."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Fix color contrast issues across task cards, column headers, status badges, and all text elements",
+      "acceptanceCriteria": [
+        "The Done column header text and icon are clearly legible against the dark green background",
+        "Task card body text (title, description, assignee, date) has strong contrast against the card background in all columns",
+        "Status badge labels (To Do, In Progress, Done) are clearly readable — text color contrasts sufficiently with badge background",
+        "Column count badges show readable numerals against their background",
+        "No text-on-background pairing in the app uses the same or near-identical hue/lightness for both",
+        "Contrast ratio for all body text meets at least 4.5:1 against its direct background"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/KanbanBoard.tsx",
+          "operation": "modify",
+          "description": "Update the Done column header styling to ensure high contrast between the dark green background and header text/icon. Change the header text color from the current muted color to a bright color like 'text-white' or 'text-green-50'. Ensure the column count badge (the number bubble) has sufficient contrast by using a lighter badge background (e.g., 'bg-green-100') with dark text ('text-green-900') or white text on a darker green badge. Also review the To Do and In Progress column headers to ensure their count badges have adequate contrast against their respective backgrounds."
+        },
+        {
+          "path": "frontend/src/components/TaskCard.tsx",
+          "operation": "modify",
+          "description": "Improve contrast for all text elements within task cards across all columns. Ensure the task title uses a high-contrast color like 'text-foreground' or 'text-gray-100' in dark mode. Update assignee name text to use a clearly contrasting color (avoid muted grays that blend with card backgrounds). Ensure date/deadline text has sufficient contrast by using colors like 'text-gray-200' or 'text-gray-100' instead of 'text-gray-400'. Review and adjust the card background opacity or color to ensure separation from body text. If using semi-transparent backgrounds, ensure the final computed color provides at least 4.5:1 contrast ratio with overlaid text."
+        },
+        {
+          "path": "frontend/src/components/StatusBadgeDropdown.tsx",
+          "operation": "modify",
+          "description": "Fix contrast issues in status badges by ensuring badge text colors are clearly readable against their background colors. For the Done badge with green background, use white or very light text (e.g., 'text-white' or 'text-green-50'). For In Progress badge with blue background, use white or very light text. For To Do badge, ensure adequate contrast between text and badge background. Update the badge styling to use strongly contrasting text-background pairs that meet WCAG AA standards (4.5:1 minimum contrast ratio)."
+        },
+        {
+          "path": "frontend/src/components/PriorityBadge.tsx",
+          "operation": "modify",
+          "description": "Review and update priority badge contrast to ensure the text label (High, Medium, Low) is clearly readable against the badge background color. Adjust text colors to provide high contrast: use dark text on light badge backgrounds or white text on dark badge backgrounds. Ensure the emoji and text combination does not create visual confusion due to poor contrast."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Review and adjust global CSS custom properties for dark theme to ensure all color tokens provide sufficient contrast when used together. Update foreground, muted-foreground, and card-foreground color definitions to ensure text on backgrounds meets a minimum 4.5:1 contrast ratio. Consider lightening foreground colors or darkening background colors in dark mode to improve readability across the entire application. Ensure theme consistency by testing color combinations used in cards, badges, headers, and body text."
         }
       ]
     }

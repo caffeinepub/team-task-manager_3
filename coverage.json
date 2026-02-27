@@ -1,42 +1,56 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T08:49:39.111Z",
+  "generatedAt": "2026-02-27T18:04:30.873Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 2,
-    "implemented": 1,
+    "implemented": 2,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Remove the permission check that blocks non-admin users from adding team members in the backend. The `addTeamMember` function should allow any authenticated caller to add a team member without role-based restriction.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "summary": "Reposition the Reminders dropdown panel so it does not overlap the Export button or the date filter buttons (This Week, This Month, Custom). The panel should open below the notification bell icon without covering any toolbar elements, ensuring proper z-index layering and positioning so all toolbar controls remain fully visible and accessible when the Reminders panel is open.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/NotificationBell.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/NotificationBell.tsx"
+        ]
       },
       {
         "id": "REQ-2",
-        "summary": "Update the `AddUserModal` component to remove any frontend-side permission guard or error display (the 'You do not have permission to add team members' message). The modal should show only the clean form with Name, Email ID, and Role fields, plus Cancel and Add Member buttons.",
+        "summary": "Fix color contrast issues across the entire application. Specifically: (1) The 'Done' column header currently has a very dark green background — ensure the header text and icon are clearly readable against it. (2) Task cards in all columns must have sufficient contrast between card background and body text, assignee names, and date text. (3) Status badge text (To Do, In Progress, Done) must contrast clearly against their badge background colors. (4) Column header badges (task count circles) must have readable text on their background. (5) All body text throughout the app must meet a minimum contrast ratio of 4.5:1 against its background. Avoid pairing similarly dark or similarly light colors for text and background.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/AddUserModal.tsx"
+          "frontend/src/components/KanbanBoard.tsx",
+          "frontend/src/components/TaskCard.tsx",
+          "frontend/src/components/StatusBadgeDropdown.tsx",
+          "frontend/src/components/PriorityBadge.tsx",
+          "frontend/src/index.css"
         ],
         "matchedFiles": [
-          "frontend/src/components/AddUserModal.tsx"
+          "frontend/src/components/KanbanBoard.tsx",
+          "frontend/src/components/TaskCard.tsx",
+          "frontend/src/components/StatusBadgeDropdown.tsx",
+          "frontend/src/components/PriorityBadge.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/AddUserModal.tsx",
+    "frontend/src/components/KanbanBoard.tsx",
+    "frontend/src/components/NotificationBell.tsx",
+    "frontend/src/components/PriorityBadge.tsx",
+    "frontend/src/components/StatusBadgeDropdown.tsx",
+    "frontend/src/components/TaskCard.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

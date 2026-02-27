@@ -1,72 +1,90 @@
-import { RouterProvider, createRouter, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createRouter, RouterProvider, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
+import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
-import { AuthProvider } from './contexts/AuthContext';
+import { useInternetIdentity } from './hooks/useInternetIdentity';
 import Layout from './components/Layout';
-import AdminDashboard from './pages/AdminDashboard';
-import TeamMemberView from './pages/TeamMemberView';
+import Dashboard from './pages/Dashboard';
 import Tasks from './pages/Tasks';
-import ActivityLog from './pages/ActivityLog';
 import TeamMembers from './pages/TeamMembers';
-import { useTheme } from './hooks/useTheme';
+import Login from './pages/Login';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 30_000,
+    },
+  },
+});
 
-function ThemeInitializer() {
-  useTheme();
-  return null;
+// Root route with auth guard
+function AuthGuard() {
+  const { identity, isInitializing } = useInternetIdentity();
+  const isAuthenticated = !!identity;
+
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground text-sm">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Login />;
+  }
+
+  return (
+    <Layout>
+      <Outlet />
+    </Layout>
+  );
 }
 
-// Root route with layout
 const rootRoute = createRootRoute({
-  component: () => <Outlet />,
+  component: () => (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+        <AuthGuard />
+        <Toaster richColors position="top-right" />
+      </ThemeProvider>
+    </QueryClientProvider>
+  ),
 });
 
-// Main layout (with sidebar) — always accessible, no auth gate
-const mainLayoutRoute = createRoute({
+const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
-  id: 'main-layout',
-  component: () => <Layout><Outlet /></Layout>,
-});
-
-const dashboardRoute = createRoute({
-  getParentRoute: () => mainLayoutRoute,
   path: '/',
-  component: AdminDashboard,
+  component: Dashboard,
 });
 
 const tasksRoute = createRoute({
-  getParentRoute: () => mainLayoutRoute,
+  getParentRoute: () => rootRoute,
   path: '/tasks',
   component: Tasks,
 });
 
-const activityLogRoute = createRoute({
-  getParentRoute: () => mainLayoutRoute,
-  path: '/activity-log',
-  component: ActivityLog,
+const teamRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/team',
+  component: TeamMembers,
 });
 
 const teamMembersRoute = createRoute({
-  getParentRoute: () => mainLayoutRoute,
+  getParentRoute: () => rootRoute,
   path: '/team-members',
   component: TeamMembers,
 });
 
-const myTasksRoute = createRoute({
-  getParentRoute: () => mainLayoutRoute,
-  path: '/my-tasks',
-  component: TeamMemberView,
-});
-
 const routeTree = rootRoute.addChildren([
-  mainLayoutRoute.addChildren([
-    dashboardRoute,
-    tasksRoute,
-    activityLogRoute,
-    teamMembersRoute,
-    myTasksRoute,
-  ]),
+  indexRoute,
+  tasksRoute,
+  teamRoute,
+  teamMembersRoute,
 ]);
 
 const router = createRouter({ routeTree });
@@ -77,22 +95,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-function AppContent() {
-  return (
-    <>
-      <ThemeInitializer />
-      <RouterProvider router={router} />
-      <Toaster richColors position="top-right" />
-    </>
-  );
-}
-
 export default function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </QueryClientProvider>
-  );
+  return <RouterProvider router={router} />;
 }

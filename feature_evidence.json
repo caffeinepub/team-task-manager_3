@@ -2,10 +2,32 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-addusermodal-component-to-remove-any-frontend-side-permission-guard-or-error-display-the-you-do-not-have-permission-to-add-team-members-message-the-modal-should-show-only-the-clean-form-with-name-email-id-and-role-fields-plus-cancel-and-add-member-buttons",
-      "featureTitle": "Update the `AddUserModal` component to remove any frontend-side permission guard or error display (the 'You do not have permission to add team members' message). The modal should show only the clean form with Name, Email ID, and Role fields, plus Cancel and Add Member buttons.",
+      "featureId": "feature-reposition-the-reminders-dropdown-panel-so-it-does-not-overlap-the-export-button-or-the-date-filter-buttons-this-week-this-month-custom-the-panel-should-open-below-the-notification-bell-icon-without-covering-any-toolbar-elements-ensuring-proper-z-index-layering-and-positioning-so-all-toolbar-controls-remain-fully-visible-and-accessible-when-the-reminders-panel-is-open",
+      "featureTitle": "Reposition the Reminders dropdown panel so it does not overlap the Export button or the date filter buttons (This Week, This Month, Custom). The panel should open below the notification bell icon without covering any toolbar elements, ensuring proper z-index layering and positioning so all toolbar controls remain fully visible and accessible when the Reminders panel is open.",
       "files": [
-        "frontend/src/components/AddUserModal.tsx"
+        "frontend/src/components/NotificationBell.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-fix-color-contrast-issues-across-the-entire-application-specifically-1-the-done-column-header-currently-has-a-very-dark-green-background-ensure-the-header-text-and-icon-are-clearly-readable-against-it-2-task-cards-in-all-columns-must-have-sufficient-contrast-between-card-background-and-body-text-assignee-names-and-date-text-3-status-badge-text-to-do-in-progress-done-must-contrast-clearly-against-their-badge-background-colors-4-column-header-badges-task-count-circles-must-have-readable-text-on-their-background-5-all-body-text-throughout-the-app-must-meet-a-minimum-contrast-ratio-of-4-5-1-against-its-background-avoid-pairing-similarly-dark-or-similarly-light-colors-for-text-and-background",
+      "featureTitle": "Fix color contrast issues across the entire application. Specifically: (1) The 'Done' column header currently has a very dark green background — ensure the header text and icon are clearly readable against it. (2) Task cards in all columns must have sufficient contrast between card background and body text, assignee names, and date text. (3) Status badge text (To Do, In Progress, Done) must contrast clearly against their badge background colors. (4) Column header badges (task count circles) must have readable text on their background. (5) All body text throughout the app must meet a minimum contrast ratio of 4.5:1 against its background. Avoid pairing similarly dark or similarly light colors for text and background.",
+      "files": [
+        "frontend/src/components/KanbanBoard.tsx",
+        "frontend/src/components/PriorityBadge.tsx",
+        "frontend/src/components/StatusBadgeDropdown.tsx",
+        "frontend/src/components/TaskCard.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",

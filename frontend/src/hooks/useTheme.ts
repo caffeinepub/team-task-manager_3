@@ -1,51 +1,61 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 
-export type AppTheme = 'dark' | 'light' | 'normal';
+type Theme = 'dark' | 'light';
 
-const STORAGE_KEY = 'hallmark-theme';
-const DEFAULT_THEME: AppTheme = 'dark';
+const STORAGE_KEY = 'taskflow-theme';
 
-function applyTheme(theme: AppTheme) {
+function getInitialTheme(): Theme {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === 'light' || stored === 'dark') return stored;
+  } catch {
+    // ignore
+  }
+  return 'dark';
+}
+
+function applyTheme(theme: Theme) {
   const root = document.documentElement;
-  // Remove all theme classes
-  root.classList.remove('dark', 'light', 'normal');
-  // Add the new theme class
-  root.classList.add(theme);
-  // Also set data-theme attribute for CSS selector fallback
-  root.setAttribute('data-theme', theme);
+  if (theme === 'light') {
+    root.classList.add('light');
+    root.classList.remove('dark');
+    root.setAttribute('data-theme', 'light');
+  } else {
+    root.classList.remove('light');
+    root.classList.add('dark');
+    root.setAttribute('data-theme', 'dark');
+  }
 }
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<AppTheme>(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY) as AppTheme | null;
-      if (stored && ['dark', 'light', 'normal'].includes(stored)) return stored;
-    } catch {
-      // ignore
-    }
-    return DEFAULT_THEME;
-  });
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
-  // Apply on mount and whenever theme changes
   useEffect(() => {
     applyTheme(theme);
-    try {
-      localStorage.setItem(STORAGE_KEY, theme);
-    } catch {
-      // ignore
-    }
-  }, [theme]);
-
-  const setTheme = useCallback((newTheme: AppTheme) => {
-    setThemeState(newTheme);
-    // Apply immediately (don't wait for re-render)
-    applyTheme(newTheme);
-    try {
-      localStorage.setItem(STORAGE_KEY, newTheme);
-    } catch {
-      // ignore
-    }
   }, []);
 
-  return { theme, setTheme };
+  const toggleTheme = () => {
+    setTheme(prev => {
+      const next: Theme = prev === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      try {
+        localStorage.setItem(STORAGE_KEY, next);
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
+
+  const setThemeValue = (t: Theme) => {
+    applyTheme(t);
+    try {
+      localStorage.setItem(STORAGE_KEY, t);
+    } catch {
+      // ignore
+    }
+    setTheme(t);
+  };
+
+  return { theme, toggleTheme, setTheme: setThemeValue };
 }

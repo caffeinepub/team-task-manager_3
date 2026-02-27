@@ -5,34 +5,34 @@ interface PriorityBadgeProps {
   size?: 'sm' | 'md';
 }
 
-const PRIORITY_CONFIG = {
-  [Priority.High]: {
-    label: 'High',
-    emoji: '🔴',
-    classes: 'bg-red-500/15 text-red-400 border-red-500/30',
-  },
-  [Priority.Medium]: {
-    label: 'Medium',
-    emoji: '🟡',
-    classes: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
-  },
-  [Priority.Low]: {
-    label: 'Low',
-    emoji: '🟢',
-    classes: 'bg-green-500/15 text-green-400 border-green-500/30',
-  },
-};
-
 export default function PriorityBadge({ priority, size = 'sm' }: PriorityBadgeProps) {
-  const config = PRIORITY_CONFIG[priority] ?? PRIORITY_CONFIG[Priority.Medium];
-  const sizeClasses = size === 'sm' ? 'text-xs px-2 py-0.5' : 'text-sm px-2.5 py-1';
+  const config = {
+    [Priority.High]: {
+      label: 'High',
+      emoji: '🔴',
+      classes: 'bg-red-700/40 text-red-200 border border-red-500/40',
+    },
+    [Priority.Medium]: {
+      label: 'Medium',
+      emoji: '🟡',
+      classes: 'bg-yellow-700/40 text-yellow-200 border border-yellow-500/40',
+    },
+    [Priority.Low]: {
+      label: 'Low',
+      emoji: '🟢',
+      classes: 'bg-emerald-700/40 text-emerald-200 border border-emerald-500/40',
+    },
+  };
+
+  const { label, emoji, classes } = config[priority];
+  const sizeClasses = size === 'sm' ? 'text-xs px-2 py-0.5' : 'text-sm px-3 py-1';
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border font-medium ${sizeClasses} ${config.classes}`}
+      className={`inline-flex items-center gap-1 rounded-full font-medium ${classes} ${sizeClasses}`}
     >
-      <span className="text-[10px]">{config.emoji}</span>
-      {config.label}
+      <span>{emoji}</span>
+      {label}
     </span>
   );
 }

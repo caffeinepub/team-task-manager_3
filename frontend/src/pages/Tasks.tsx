@@ -1,117 +1,128 @@
-import { useState } from 'react';
-import { Plus } from 'lucide-react';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useGetAllTasks, useDeleteTask, useGetTeamMembers } from '../hooks/useQueries';
-import { useAuth } from '../contexts/AuthContext';
-import { sortTasksByDeadlineAndPriority } from '../utils/taskSorting';
-import { useTaskFilters, type TaskFiltersState } from '../hooks/useTaskFilters';
-import TaskCard from '../components/TaskCard';
+import React, { useState } from 'react';
+import { LayoutGrid, List, Plus } from 'lucide-react';
+import { useGetTasks, useListTeamMembers, useIsCallerAdmin } from '../hooks/useQueries';
+import { useTaskFilters } from '../hooks/useTaskFilters';
+import KanbanBoard from '../components/KanbanBoard';
 import TaskFilters from '../components/TaskFilters';
 import CreateTaskModal from '../components/CreateTaskModal';
-import EditTaskModal from '../components/EditTaskModal';
+import InlineTaskForm from '../components/InlineTaskForm';
+import PersistentTaskForm from '../components/PersistentTaskForm';
 import ReportExportButtons from '../components/ReportExportButtons';
-import type { Task, TeamMember } from '../backend';
+import { Button } from '@/components/ui/button';
+import { Task } from '../backend';
+import TaskCard from '../components/TaskCard';
 
 export default function Tasks() {
-  const { isAdmin } = useAuth();
-  const { data: tasks = [], isLoading } = useGetAllTasks();
-  const { data: teamMembers = [] } = useGetTeamMembers();
-  const deleteTask = useDeleteTask();
+  const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
+  const [createTaskOpen, setCreateTaskOpen] = useState(false);
+  const [filters, setFilters] = useState({ search: '', assigneeId: '' });
 
-  const [filters, setFilters] = useState<TaskFiltersState>({ searchText: '', selectedAssignee: '' });
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const { data: tasks = [], isLoading } = useGetTasks();
+  const { data: members = [] } = useListTeamMembers();
+  const { data: isAdmin } = useIsCallerAdmin();
 
-  const sortedTasks = sortTasksByDeadlineAndPriority(tasks);
-  const filteredTasks = useTaskFilters(sortedTasks, filters);
-
-  // Extract member names for components that expect string[]
-  const memberNames = teamMembers.map((m: TeamMember) => m.name);
-
-  const handleDelete = async (taskId: bigint) => {
-    try {
-      await deleteTask.mutateAsync(taskId);
-      toast.success('Task deleted');
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to delete task';
-      toast.error(msg);
-    }
-  };
+  const filteredTasks = useTaskFilters(tasks, filters);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">Tasks</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {filteredTasks.length} of {tasks.length} tasks
+          <h1 className="text-2xl font-bold text-foreground">Tasks</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            {tasks.length} total · {filteredTasks.length} shown
           </p>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <ReportExportButtons tasks={filteredTasks} />
-          <Button
-            onClick={() => setCreateModalOpen(true)}
-            className="gap-2 rounded-xl font-semibold shadow-sm"
-            size="lg"
-          >
-            <Plus size={18} />
-            Create Task
-          </Button>
+        <div className="flex items-center gap-2">
+          {/* View Toggle */}
+          <div className="flex items-center bg-card border border-border rounded-xl p-1">
+            <button
+              onClick={() => setViewMode('kanban')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                viewMode === 'kanban'
+                  ? 'bg-primary text-primary-foreground shadow-glow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <LayoutGrid size={15} />
+              <span className="hidden sm:inline">Kanban</span>
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                viewMode === 'list'
+                  ? 'bg-primary text-primary-foreground shadow-glow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <List size={15} />
+              <span className="hidden sm:inline">List</span>
+            </button>
+          </div>
+
+          <ReportExportButtons tasks={tasks} />
+
+          {isAdmin && (
+            <Button
+              onClick={() => setCreateTaskOpen(true)}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 rounded-xl shadow-glow-sm"
+            >
+              <Plus size={16} />
+              <span className="hidden sm:inline">Add Task</span>
+            </Button>
+          )}
         </div>
       </div>
+
+      {/* Inline Task Form (admin only, collapsible) — rendered at the top */}
+      <InlineTaskForm isAdmin={!!isAdmin} />
 
       {/* Filters */}
       <TaskFilters
         filters={filters}
-        teamMembers={memberNames}
-        onChange={setFilters}
+        onFiltersChange={setFilters}
+        members={members}
       />
 
-      {/* Task list */}
+      {/* Content */}
       {isLoading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map(i => (
-            <Skeleton key={i} className="h-32 w-full rounded-2xl" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="h-40 bg-card border border-border rounded-2xl animate-pulse" />
           ))}
         </div>
-      ) : filteredTasks.length === 0 ? (
-        <div className="text-center py-16 text-muted-foreground">
-          <p className="text-lg font-bold">No tasks found</p>
-          <p className="text-sm mt-1">
-            {filters.searchText || filters.selectedAssignee
-              ? 'Try adjusting your filters'
-              : 'Create your first task to get started'}
-          </p>
-        </div>
+      ) : viewMode === 'kanban' ? (
+        <KanbanBoard tasks={filteredTasks} members={members} isAdmin={!!isAdmin} />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredTasks.map(task => (
-            <TaskCard
-              key={task.id.toString()}
-              task={task}
-              onEdit={isAdmin ? () => setEditingTask(task) : undefined}
-              onDelete={isAdmin ? handleDelete : undefined}
-            />
-          ))}
+        <div className="space-y-3">
+          {filteredTasks.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground bg-card border border-border rounded-2xl">
+              <List size={40} className="mx-auto mb-3 opacity-40" />
+              <p className="font-medium">No tasks found</p>
+              <p className="text-sm mt-1">Try adjusting your filters</p>
+            </div>
+          ) : (
+            filteredTasks.map((task: Task) => (
+              <TaskCard
+                key={task.id.toString()}
+                task={task}
+                members={members}
+                isAdmin={!!isAdmin}
+              />
+            ))
+          )}
         </div>
       )}
+
+      {/* ── Persistent Add Task Form (visible to all authenticated users) ── */}
+      <div className="pt-2">
+        <PersistentTaskForm />
+      </div>
 
       <CreateTaskModal
-        open={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
-        teamMembers={memberNames}
+        open={createTaskOpen}
+        onClose={() => setCreateTaskOpen(false)}
       />
-
-      {editingTask && (
-        <EditTaskModal
-          task={editingTask}
-          open={!!editingTask}
-          onOpenChange={open => { if (!open) setEditingTask(null); }}
-        />
-      )}
     </div>
   );
 }

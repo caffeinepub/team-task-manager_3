@@ -1,138 +1,109 @@
 import React, { useState } from 'react';
-import { useGetTeamMembers, useRemoveTeamMember } from '../hooks/useQueries';
-import { useAuth } from '../contexts/AuthContext';
-import AddUserModal from '../components/AddUserModal';
-import { Role, TeamMember } from '../backend';
-import { UserPlus, Trash2, Users, Shield, User } from 'lucide-react';
+import { Users, UserCheck, UserX, Plus } from 'lucide-react';
+import { useListTeamMembers, useIsCallerAdmin } from '../hooks/useQueries';
+import TeamMemberCard from '../components/TeamMemberCard';
+import AddTeamMemberModal from '../components/AddTeamMemberModal';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
 
 export default function TeamMembers() {
-  const { currentUser, isAdmin } = useAuth();
-  const { data: members = [], isLoading } = useGetTeamMembers();
-  const removeTeamMember = useRemoveTeamMember();
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [addMemberOpen, setAddMemberOpen] = useState(false);
+  const { data: members = [], isLoading } = useListTeamMembers();
+  const { data: isAdmin } = useIsCallerAdmin();
 
-  // Extra safety: check role directly from currentUser in case isAdmin context lags
-  const userIsAdmin =
-    isAdmin ||
-    (currentUser?.role != null &&
-      String(currentUser.role).toLowerCase() === 'admin');
+  const totalMembers = members.length;
+  const claimedMembers = members.filter((m) => m.claimedBy).length;
+  const unclaimedMembers = members.filter((m) => !m.claimedBy).length;
 
-  const handleRemove = async (member: TeamMember) => {
-    if (!confirm(`Remove ${member.name} from the team?`)) return;
-    try {
-      await removeTeamMember.mutateAsync(member.name);
-      toast.success(`${member.name} removed from team`);
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to remove team member');
-    }
-  };
+  const statCards = [
+    {
+      label: 'Total Members',
+      value: totalMembers,
+      icon: <Users size={20} />,
+      color: 'text-purple-400',
+      bg: 'bg-purple-500/10',
+      border: 'border-purple-500/20',
+    },
+    {
+      label: 'Active',
+      value: claimedMembers,
+      icon: <UserCheck size={20} />,
+      color: 'text-green-400',
+      bg: 'bg-green-500/10',
+      border: 'border-green-500/20',
+    },
+    {
+      label: 'Unclaimed',
+      value: unclaimedMembers,
+      icon: <UserX size={20} />,
+      color: 'text-yellow-400',
+      bg: 'bg-yellow-500/10',
+      border: 'border-yellow-500/20',
+    },
+  ];
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-xl">
-            <Users className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Team Members</h1>
-            <p className="text-sm text-muted-foreground">
-              {members.length} member{members.length !== 1 ? 's' : ''} in your team
-            </p>
-          </div>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Team Members</h1>
+          <p className="text-muted-foreground text-sm mt-1">Manage your team</p>
         </div>
-
-        {/* Add button for admins */}
-        {userIsAdmin && (
+        {isAdmin && (
           <Button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2"
+            onClick={() => setAddMemberOpen(true)}
+            className="bg-purple-500 hover:bg-purple-600 text-white gap-2 rounded-xl shadow-glow-sm"
           >
-            <UserPlus className="w-4 h-4" />
-            Add Team Member
+            <Plus size={16} />
+            Add Member
           </Button>
         )}
       </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        {statCards.map((card) => (
+          <div
+            key={card.label}
+            className={`bg-card border ${card.border} rounded-2xl p-5 card-elevated`}
+          >
+            <div className={`w-10 h-10 rounded-xl ${card.bg} ${card.color} flex items-center justify-center mb-3`}>
+              {card.icon}
+            </div>
+            <p className="text-3xl font-bold text-foreground">{card.value}</p>
+            <p className="text-muted-foreground text-sm mt-1">{card.label}</p>
+          </div>
+        ))}
+      </div>
+
       {/* Members List */}
       {isLoading ? (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 bg-muted animate-pulse rounded-2xl" />
+            <div key={i} className="h-40 bg-card border border-border rounded-2xl animate-pulse" />
           ))}
         </div>
       ) : members.length === 0 ? (
-        <div className="text-center py-16 text-muted-foreground">
-          <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
-          <p className="text-lg font-medium">No team members yet</p>
-          {userIsAdmin && (
-            <p className="text-sm mt-1">
-              Click "Add Team Member" to get started
-            </p>
-          )}
+        <div className="text-center py-16 bg-card border border-border rounded-2xl text-muted-foreground">
+          <Users size={48} className="mx-auto mb-3 opacity-40" />
+          <p className="font-medium text-foreground">No team members yet</p>
+          <p className="text-sm mt-1">Add your first team member to get started</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {members.map((member) => (
-            <div
-              key={member.email || member.name}
-              className="flex items-center justify-between p-4 bg-card border border-border rounded-2xl shadow-card hover:shadow-card-hover transition-shadow"
-            >
-              <div className="flex items-center gap-4">
-                {/* Avatar */}
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm shrink-0">
-                  {member.name.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <p className="font-semibold text-foreground">{member.name}</p>
-                  <p className="text-sm text-muted-foreground">{member.email}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                {/* Role Badge */}
-                <Badge
-                  variant={
-                    String(member.role).toLowerCase() === 'admin'
-                      ? 'default'
-                      : 'secondary'
-                  }
-                  className="flex items-center gap-1"
-                >
-                  {String(member.role).toLowerCase() === 'admin' ? (
-                    <Shield className="w-3 h-3" />
-                  ) : (
-                    <User className="w-3 h-3" />
-                  )}
-                  {String(member.role) === Role.Admin ? 'Admin' : 'Member'}
-                </Badge>
-
-                {/* Remove button (admin only) */}
-                {userIsAdmin && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleRemove(member)}
-                    disabled={removeTeamMember.isPending}
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
+            <TeamMemberCard
+              key={member.id.toString()}
+              member={member}
+              isAdmin={!!isAdmin}
+            />
           ))}
         </div>
       )}
 
-      {/* Add Team Member Modal — uses onOpenChange as defined in AddUserModal */}
-      <AddUserModal
-        open={showAddModal}
-        onOpenChange={setShowAddModal}
+      <AddTeamMemberModal
+        open={addMemberOpen}
+        onOpenChange={setAddMemberOpen}
       />
     </div>
   );
